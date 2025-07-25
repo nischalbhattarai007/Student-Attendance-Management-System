@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Login</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/loader.css" />
+</head>
+<body>
+  <div class="background-blur"></div>
+
+  <div class="form-container">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <div class="input-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required />
+      </div>
+      <div class="input-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required />
+      </div>
+     
+      <button type="submit" class="submit-btn">Login</button>
+      <div class="admin-login-container">
+        <button type="button" class="admin-login-btn" onclick="window.location.href='/signin'">
+          Student Login
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Loader and Success Message -->
+  <div class="overlay" id="loaderOverlay">
+    <div class="loader" id="loader"></div>
+    <div class="success-message" id="successMessage">
+      <div class="success-icon">✅</div>
+      Successfully Logged In!
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Show loader
+      document.getElementById('loaderOverlay').style.display = 'flex';
+      
+      // Collect form data
+      const formData = new FormData(this);
+      
+      // Send data to server
+      fetch('/admin-signin', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Show success message
+          document.getElementById('loader').style.display = 'none';
+          document.getElementById('successMessage').style.display = 'flex';
+          
+          // Redirect after delay
+          setTimeout(() => {
+            window.location.href = data.redirect;
+          }, 1500);
+        } else {
+          // Hide loader and show error
+          document.getElementById('loaderOverlay').style.display = 'none';
+          alert(data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('loaderOverlay').style.display = 'none';
+        alert('An error occurred. Please try again.');
+      });
+    });
+  </script>
+</body>
+</html>

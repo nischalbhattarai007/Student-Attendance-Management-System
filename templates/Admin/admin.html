@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+</head>
+<body class="bg-slate-100 font-sans">
+  <div id="message-area" class="fixed top-4 right-4 z-50"></div>
+  <div class="flex h-screen w-screen">
+    <aside class="w-64 bg-blue-700 text-blue-100 h-screen fixed top-0 left-0 shadow-lg z-30 flex flex-col">
+      <div class="px-6 py-5 mb-4 border-b border-blue-600">
+        <a href="#" class="flex items-center space-x-3 text-xl font-semibold text-white">
+          <i class="fas fa-user-shield fa-lg text-blue-300"></i>
+          <span>Admin Portal</span>
+        </a>
+      </div>
+      <nav class="flex-grow px-4 space-y-1">
+        <a href="javascript:void(0);" onclick="showSection('dashboard', this)" class="sidebar-link active group flex items-center py-2.5 px-4 rounded-md transition duration-200 hover:bg-blue-600 hover:text-white">
+          <i class="fas fa-tachometer-alt mr-3 text-blue-300 group-hover:text-white transition-colors duration-200"></i>
+          <span class="font-medium">Dashboard</span>
+        </a>
+        <a href="javascript:void(0);" onclick="showSection('manage-student', this)" class="sidebar-link group flex items-center py-2.5 px-4 rounded-md transition duration-200 hover:bg-blue-600 hover:text-white">
+          <i class="fas fa-users-cog mr-3 text-blue-300 group-hover:text-white transition-colors duration-200"></i>
+          <span class="font-medium">Manage Student</span>
+        </a>
+        <a href="javascript:void(0);" onclick="showSection('manage-classes', this)" class="sidebar-link group flex items-center py-2.5 px-4 rounded-md transition duration-200 hover:bg-blue-600 hover:text-white">
+          <i class="fas fa-chalkboard-teacher mr-3 text-blue-300 group-hover:text-white transition-colors duration-200"></i>
+          <span class="font-medium">Manage Classes</span>
+        </a>
+        <a href="javascript:void(0);" onclick="showSection('manage-announcements', this)" class="sidebar-link group flex items-center py-2.5 px-4 rounded-md transition duration-200 hover:bg-blue-600 hover:text-white">
+          <i class="fas fa-bullhorn mr-3 text-blue-300 group-hover:text-white transition-colors duration-200"></i>
+          <span class="font-medium">Manage Announcements</span>
+        </a>
+        <a href="javascript:void(0);" onclick="showSection('reports', this)" class="sidebar-link group flex items-center py-2.5 px-4 rounded-md transition duration-200 hover:bg-blue-600 hover:text-white">
+          <i class="fas fa-chart-pie mr-3 text-blue-300 group-hover:text-white transition-colors duration-200"></i>
+          <span class="font-medium">Reports</span>
+        </a>
+        <a href="javascript:void(0);" onclick="showSection('manage-class-routines', this)" class="sidebar-link group flex items-center py-2.5 px-4 rounded-md transition duration-200 hover:bg-blue-600 hover:text-white">
+          <i class="fas fa-calendar-alt mr-3 text-blue-300 group-hover:text-white transition-colors duration-200"></i>
+          <span class="font-medium">Manage Routines</span>
+        </a>
+
+      </nav>
+      <div class="p-4 mt-auto border-t border-blue-600">
+        <p class="text-xs text-blue-300 text-center">&copy; 2025 Attendance System</p>
+      </div>
+    </aside>
+    <div class="ml-64 flex-1 h-screen overflow-y-auto">
+      <header class="flex justify-between items-center px-6 py-4 bg-white shadow-lg sticky top-0 z-40 mb-6">
+          <h2 id="main-title" class="text-3xl font-semibold text-gray-800">Dashboard</h2>
+          <div class="flex items-center space-x-4">
+            <div id="clock" class="text-lg font-medium text-gray-700 bg-slate-100 px-4 py-2 rounded-lg shadow-inner"></div>
+            <div class="relative">
+              <button onclick="toggleDropdown('notification-dropdown')" class="text-gray-600 hover:text-blue-600 focus:outline-none">
+                <i class="fas fa-bell fa-lg"></i>
+                <span id="notification-badge-count" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full transform translate-x-1/2 -translate-y-1/2 hidden">0</span>
+              </button>
+              <div id="notification-dropdown" class="dropdown-menu w-80">
+                <div class="px-4 py-3 border-b font-semibold text-sm text-gray-700 dark:text-slate-200 dark:border-slate-600 flex justify-between items-center">
+                  <span>Notifications</span>
+                  <button id="clear-all-notifications-btn" class="text-xs text-blue-500 hover:text-blue-700 hover:underline">Clear All</button>
+                </div>
+                <div id="notification-list" class="max-h-72 overflow-y-auto custom-scrollbar">
+                  <!-- Notifications will be populated here by JS -->
+                </div>
+                <div class="p-2 text-center border-t dark:border-slate-600">
+                  <a href="#" class="text-sm text-blue-600 hover:underline">View all notifications</a>
+                </div>
+              </div>
+            </div>
+            <div class="relative group">
+              <button onclick="toggleDropdown('admin-profile-dropdown')" class="flex items-center space-x-2 p-2 rounded-md hover:bg-slate-700 transition duration-150">
+                <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
+                  A <!-- Assuming admin_profile.name might not always be available or just an initial -->
+                </div>
+                <span class="font-medium text-gray-700 group-hover:text-slate-100">{{ admin_profile.name if admin_profile else 'Admin' }}</span>
+                <i class="fas fa-chevron-down text-xs text-gray-700 group-hover:text-slate-100"></i>
+              </button>
+              <div id="admin-profile-dropdown" class="dropdown-menu hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                <a href="javascript:void(0);" onclick="showSection('profile', null); toggleDropdown('admin-profile-dropdown'); return false;" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <i class="fas fa-user-circle mr-2"></i>My Profile
+                </a>
+                <a href="{{ url_for('logout') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                </a>
+              </div>
+            </div>
+          </div>
+      </header>
+
+      <main class="p-6 w-full max-w-full">
+        <section id="dashboard-content" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4 border-l-4 border-blue-500 hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 cursor-pointer">
+                  <i class="fas fa-users fa-3x text-blue-500"></i>
+                  <div>
+                      <p class="text-gray-600 text-sm">Total Students</p>
+                      <p id="total-students-card" class="text-2xl font-bold text-gray-800">0</p>
+                  </div>
+              </div>
+              <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4 border-l-4 border-green-500 hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 cursor-pointer">
+                  <i class="fas fa-chalkboard-teacher fa-3x text-green-500"></i>
+                  <div>
+                      <p class="text-gray-600 text-sm">Faculties</p>
+                      <p id="total-faculties-card" class="text-2xl font-bold text-gray-800">0</p> <!-- Updated ID here -->
+                  </div>
+              </div>
+          </div>
+
+          <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold mb-4 text-gray-700">Student Distribution by Semester</h3>
+            <div class="mb-4 space-x-2 flex flex-wrap gap-2">
+              <button onclick="updateStudentChart('all')" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">All Semesters</button>
+              <button onclick="updateStudentChart(1)" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Semester 1</button>
+              <button onclick="updateStudentChart(2)" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">Semester 2</button>
+              <button onclick="updateStudentChart(3)" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">Semester 3</button>
+              <button onclick="updateStudentChart(4)" class="bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded">Semester 4</button>
+              <button onclick="updateStudentChart(5)" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Semester 5</button>
+              <button onclick="updateStudentChart(6)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Semester 6</button>
+              <button onclick="updateStudentChart(7)" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Semester 7</button>
+              <button onclick="updateStudentChart(8)" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Semester 8</button>
+            </div>
+            <canvas id="adminSemesterChart" height="120"></canvas>
+          </div>
+        </section>
+
+        <section id="manage-student-content" class="hidden space-y-6">
+          <h3 class="text-2xl font-semibold text-gray-700">Manage Students</h3>
+          <div class="bg-white p-6 rounded-lg shadow-md">
+            <div class="flex justify-between items-center mb-4">
+              <h4 class="text-xl font-semibold text-gray-700">Student List</h4>
+              <!-- Semester Filter Dropdown -->
+              <div class="flex items-center space-x-2">
+                <label for="manage-student-semester-filter" class="text-sm font-medium text-gray-700 hidden md:inline">Semester:</label>
+                <select id="manage-student-semester-filter" class="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <option value="all">All</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                  <option value="7">7</option>
+                  <option value="8">8</option>
+                </select>
+              </div>
+              <button onclick="openAddStudentModal()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                <i class="fas fa-plus mr-2"></i>Add New Student
+              </button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="min-w-full table-auto">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Photo</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Semester</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="student-table-body" class="bg-white divide-y divide-gray-200">
+                  <!-- Student data will be populated here dynamically -->
+                </tbody>
+              </table>
+              <div id="no-students-message" class="hidden text-center py-4 text-gray-500">
+                No students found. Click "Add New Student" to add students.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Add New Student Modal -->
+        <div id="addStudentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+          <div class="relative top-20 mx-auto p-8 border w-[500px] shadow-2xl rounded-lg bg-white">
+            <div class="flex justify-between items-center mb-6">
+              <h3 class="text-2xl font-bold text-gray-800">Add New Student</h3>
+              <button onclick="closeAddStudentModal()" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <form id="addStudentForm" class="space-y-6">
+              <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2">
+                  <label for="student-name" class="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
+                  <input type="text" id="student-name" name="name" required
+                         class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                </div>
+                <div>
+                  <label for="student-email" class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+                  <input type="email" id="student-email" name="email" required
+                         class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                  <p id="add-email-error" class="text-red-500 text-xs mt-1"></p>
+                </div>
+                <div>
+                  <label for="student-contact" class="block text-sm font-semibold text-gray-700 mb-1">Contact</label>
+                  <input type="tel" id="student-contact" name="contact" required
+                         class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                  <p id="add-contact-error" class="text-red-500 text-xs mt-1"></p>
+                </div>
+                <div>
+                  <label for="student-password" class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+                  <input type="password" id="student-password" name="password" required
+                         class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                  <p id="add-password-error" class="text-red-500 text-xs mt-1"></p>
+                </div>
+                <div>
+                  <label for="student-semester" class="block text-sm font-semibold text-gray-700 mb-1">Semester</label>
+                  <select id="student-semester" name="semester" required
+                          class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                    <option value="">Select Semester</option>
+                    <option value="1">1st Semester</option>
+                    <option value="2">2nd Semester</option>
+                    <option value="3">3rd Semester</option>
+                    <option value="4">4th Semester</option>
+                    <option value="5">5th Semester</option>
+                    <option value="6">6th Semester</option>
+                    <option value="7">7th Semester</option>
+                    <option value="8">8th Semester</option>
+                  </select>
+                </div>
+                <div class="col-span-2">
+                  <label for="student-address" class="block text-sm font-semibold text-gray-700 mb-1">Address</label>
+                  <textarea id="student-address" name="address" rows="3" required
+                            class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"></textarea>
+                </div>
+                <div class="col-span-2">
+                  <label class="block text-sm font-semibold text-gray-700 mb-1">Photo</label>
+                  <div class="mt-2 space-y-4">
+                    <!-- Photo Preview -->
+                    <div id="add-photo-preview-container" class="hidden w-full text-center">
+                      <img id="add-photo-preview" src="#" alt="Photo Preview" class="w-32 h-32 mx-auto rounded-lg object-cover border-2 border-gray-300">
+                      <button type="button" id="add-remove-photo-btn" class="mt-2 text-sm text-red-600 hover:underline font-semibold">Remove Photo</button>
+                    </div>
+                    
+                    <!-- Inline Camera View (Initially Hidden) -->
+                    <div id="inline-camera-container" class="hidden w-full">
+                      <div class="relative bg-black rounded-md w-full max-w-md mx-auto">
+                        <video id="camera-stream" class="w-full h-auto rounded-md" autoplay playsinline></video>
+                        <canvas id="camera-canvas" class="hidden"></canvas>
+                        <img id="camera-snapshot" src="#" class="hidden w-full h-auto rounded-md" alt="Snapshot">
+                      </div>
+                      <div id="camera-controls" class="mt-4 flex justify-center space-x-4">
+                        <button type="button" id="capture-btn" class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700"><i class="fas fa-camera mr-2"></i>Capture</button>
+                        <button type="button" id="recapture-btn" class="hidden px-4 py-2 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600"><i class="fas fa-redo mr-2"></i>Retake</button>
+                        <button type="button" id="use-photo-btn" class="hidden px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700"><i class="fas fa-check mr-2"></i>Use Photo</button>
+                        <button type="button" id="close-camera-btn" class="px-4 py-2 bg-gray-500 text-white font-semibold rounded-lg hover:bg-gray-600"><i class="fas fa-times mr-2"></i>Cancel</button>
+                      </div>
+                    </div>
+
+                    <!-- Upload/Camera Buttons -->
+                    <div id="add-photo-buttons-container" class="flex items-center justify-center space-x-4">
+                      <label for="student-photo" class="cursor-pointer bg-white text-gray-700 rounded-lg border-2 border-gray-300 border-dashed p-4 text-center hover:bg-gray-50 transition-colors duration-200 flex flex-col items-center justify-center w-32 h-24">
+                        <i class="fas fa-cloud-upload-alt text-2xl text-blue-500"></i>
+                        <span class="mt-2 text-sm font-medium">Upload</span>
+                        <input type="file" id="student-photo" name="photo" accept="image/*" class="hidden">
+                      </label>
+                      <button type="button" id="open-camera-btn" class="bg-white text-gray-700 rounded-lg border-2 border-gray-300 border-dashed p-4 text-center hover:bg-gray-50 transition-colors duration-200 flex flex-col items-center justify-center w-32 h-24">
+                        <i class="fas fa-camera text-2xl text-purple-500"></i>
+                        <span class="mt-2 text-sm font-medium">Camera</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="flex justify-end space-x-4 pt-4 border-t">
+                <button type="submit"
+                        class="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                  Add Student
+                </button>
+                <button type="button" onclick="closeAddStudentModal()"
+                        class="px-6 py-2.5 bg-gray-500 text-white font-medium rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-200">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Edit Student Modal -->
+        <div id="editStudentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+          <div class="relative top-20 mx-auto p-8 border w-[500px] shadow-2xl rounded-lg bg-white">
+            <div class="flex justify-between items-center mb-6">
+              <h3 class="text-2xl font-bold text-gray-800">Edit Student</h3>
+              <button onclick="closeEditStudentModal()" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <form id="editStudentForm" class="space-y-6">
+              <input type="hidden" id="edit-student-id">
+              <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2">
+                  <label for="edit-student-name" class="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
+                  <input type="text" id="edit-student-name" name="name" required
+                         class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                </div>
+                <div>
+                  <label for="edit-student-email" class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+                  <input type="email" id="edit-student-email" name="email" required
+                         class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                  <p id="edit-email-error" class="text-red-500 text-xs mt-1"></p>
+                </div>
+                <div>
+                  <label for="edit-student-contact" class="block text-sm font-semibold text-gray-700 mb-1">Contact</label>
+                  <input type="tel" id="edit-student-contact" name="contact" required
+                         class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                  <span id="edit-contact-error" class="text-red-500 text-xs mt-1"></span>
+                </div>
+                <div>
+                  <label for="edit-student-password" class="block text-sm font-semibold text-gray-700 mb-1">New Password </label>
+                  <input type="password" id="edit-student-password" name="password"
+                         class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" required>
+                  <span id="edit-password-error" class="text-red-500 text-xs mt-1"></span>
+                </div>
+                <div>
+                  <label for="edit-student-semester" class="block text-sm font-semibold text-gray-700 mb-1">Semester</label>
+                  <select id="edit-student-semester" name="semester" required
+                          class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                    <option value="">Select Semester</option>
+                    <option value="1">1st Semester</option>
+                    <option value="2">2nd Semester</option>
+                    <option value="3">3rd Semester</option>
+                    <option value="4">4th Semester</option>
+                    <option value="5">5th Semester</option>
+                    <option value="6">6th Semester</option>
+                    <option value="7">7th Semester</option>
+                    <option value="8">8th Semester</option>
+                  </select>
+                </div>
+                <div class="col-span-2">
+                  <label for="edit-student-address" class="block text-sm font-semibold text-gray-700 mb-1">Address</label>
+                  <textarea id="edit-student-address" name="address" rows="3"
+                            class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"></textarea>
+                </div>
+                <div class="col-span-2">
+                  <label for="edit-student-photo" class="block text-sm font-semibold text-gray-700 mb-1">Photo</label>
+                  <div class="mt-1 flex items-start space-x-4">
+                    <!-- Current Photo Display -->
+                    <div id="edit-current-photo-container">
+                        <img id="edit-student-current-photo" src="#" alt="Current Photo" class="w-20 h-20 rounded-md object-cover border">
+                        <p class="text-xs text-gray-500 mt-1">Current photo</p>
+                    </div>
+                    
+                    <!-- New Photo Preview (initially hidden) -->
+                    <div id="edit-new-photo-preview-container" class="hidden">
+                        <img id="edit-student-new-photo-preview" src="#" alt="New Photo Preview" class="w-20 h-20 rounded-md object-cover border">
+                        <button type="button" id="edit-student-remove-new-photo" class="text-xs text-red-500 hover:text-red-700 mt-1">Remove</button>
+                    </div>
+
+                    <!-- File Upload Input -->
+                    <div id="edit-student-photo-upload-label-container" class="flex-1">
+                        <label for="edit-student-photo" class="w-full flex flex-col items-center px-4 py-3 bg-white text-gray-700 rounded-lg border-2 border-gray-300 border-dashed cursor-pointer hover:bg-gray-50 transition duration-200 h-full justify-center">
+                          <i class="fas fa-cloud-upload-alt text-2xl mb-1 text-blue-500"></i>
+                          <span class="text-sm">Upload new photo</span>
+                          <input type="file" id="edit-student-photo" name="photo" accept="image/*" class="hidden">
+                        </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="flex justify-end space-x-4 pt-4 border-t">
+                <button type="submit"
+                        class="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200">
+                  Update Student
+                </button>
+                <button type="button" onclick="closeEditStudentModal()"
+                        class="px-6 py-2.5 bg-gray-500 text-white font-medium rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-200">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Reports Content -->
+        <section id="reports-content" class="hidden space-y-6">
+          <!-- Semester-wise Attendance Report -->
+          <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold mb-4 text-gray-700">Semester-wise Attendance Report</h3>
+            
+            <!-- Filter Form -->
+            <div class="flex items-center space-x-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                <div>
+                    <label for="report-semester-select" class="block text-sm font-medium text-gray-700">Semester</label>
+                    <select id="report-semester-select" name="semester"
+                            class="w-full md:w-5/4 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                        <option value="">Select Semester</option>
+                        <option value="1">1st Semester</option>
+                        <option value="2">2nd Semester</option>
+                        <option value="3">3rd Semester</option>
+                        <option value="4">4th Semester</option>
+                        <option value="5">5th Semester</option>
+                        <option value="6">6th Semester</option>
+                        <option value="7">7th Semester</option>
+                        <option value="8">8th Semester</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="report-date-input" class="block text-sm font-medium text-gray-700">Date</label>
+                    <input type="date" id="report-date-input" class="mt-1 block w-full pl-3 pr-4 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                </div>
+                <div class="pt-6">
+                    <button id="generate-report-btn" class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">Generate Report</button>
+                </div>
+            </div>
+
+            <!-- Report Table -->
+            <div class="overflow-x-auto">
+                <table id="attendance-report-table" class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student ID</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendance-report-tbody" class="bg-white divide-y divide-gray-200">
+                        <!-- Rows will be inserted here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="report-message-area" class="mt-4 text-sm text-gray-600"></div>
+          </div>
+          <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold text-gray-700 mb-4">Today's Attendance Snapshot</h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="text-left py-3 px-4 uppercase font-semibold text-sm text-gray-600">Semester</th>
+                            <th class="text-center py-3 px-4 uppercase font-semibold text-sm text-green-600">Present</th>
+                            <th class="text-center py-3 px-4 uppercase font-semibold text-sm text-red-600">Absent</th>
+                            <th class="text-center py-3 px-4 uppercase font-semibold text-sm text-blue-600">Total Students</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendance-snapshot-table-body" class="text-gray-700">
+                        <!-- Rows will be populated by JS -->
+                        <tr><td colspan="4" class="text-center py-4">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+          </div>
+          
+          
+        </section>
+
+        <!-- Manage Classes Content -->
+        <section id="manage-classes-content" class="hidden space-y-6">
+          <h3 class="text-2xl font-semibold text-gray-700">Manage Upcoming Classes</h3>
+          <!-- Content for managing classes will go here -->
+          <div class="bg-white p-6 rounded-lg shadow-md">
+            <div class="flex justify-between items-center mb-4">
+              <h4 class="text-xl font-semibold text-gray-700">Class List</h4>
+              <button onclick="openAddClassModal()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                <i class="fas fa-plus mr-2"></i>Add New Class
+              </button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="min-w-full table-auto">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Day & Time</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Faculty</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Semester</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="class-table-body" class="bg-white divide-y divide-gray-200">
+                  <!-- Class data will be populated here dynamically -->
+                </tbody>
+              </table>
+              <div id="no-classes-message" class="hidden text-center py-4 text-gray-500">
+                No classes found. Click "Add New Class" to add classes.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Manage Announcements Content -->
+        <section id="manage-announcements-content" class="hidden space-y-6">
+          <h3 class="text-2xl font-semibold text-gray-700"></h3>
+          <div class="bg-white p-6 rounded-lg shadow-md">
+            <div class="flex justify-between items-center mb-4">
+              <h4 class="text-xl font-semibold text-gray-700">Announcement List</h4>
+              <button onclick="openAddAnnouncementModal()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                <i class="fas fa-plus mr-2"></i>Add New Announcement
+              </button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="min-w-full table-auto">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Content</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Created</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="announcements-table-body" class="bg-white divide-y divide-gray-200">
+                  <!-- Announcement data will be populated here dynamically -->
+                </tbody>
+              </table>
+              <div id="no-announcements-message" class="hidden text-center py-4 text-gray-500">
+                No announcements found. Click "Add New Announcement" to add announcements.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Manage Class Routines Content -->
+        <section id="manage-class-routines-content" class="hidden space-y-6">
+          <div class="bg-white p-8 rounded-xl shadow-2xl">
+            <div class="flex items-center mb-6 text-purple-700">
+                <i class="fas fa-calendar-alt fa-2x mr-3"></i>
+                <h3 class="text-3xl font-bold">Admin Panel - Manage Class Routines</h3>
+            </div>
+
+            <!-- Semester Selection -->
+            <div class="mb-8">
+                <label for="routine-semester-filter" class="block text-sm font-medium text-gray-700 mb-1">Select Semester</label>
+                <select id="routine-semester-filter" name="semester"
+                        class="w-full md:w-1/3 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 sm:text-sm rounded-md">
+                    <option value="">-- Choose Semester --</option>
+                    <option value="1">Semester 1</option>
+                    <option value="2">Semester 2</option>
+                    <option value="3">Semester 3</option>
+                    <option value="4">Semester 4</option>
+                    <option value="5">Semester 5</option>
+                    <option value="6">Semester 6</option>
+                    <option value="7">Semester 7</option>
+                    <option value="8">Semester 8</option>
+                </select>
+            </div>
+
+            <!-- Add Routine Entry Form (Inline) -->
+            <div id="add-routine-form-container" class="mb-10 p-6 bg-purple-50 rounded-lg shadow hidden">
+                <h4 class="text-xl font-semibold text-purple-700 mb-4 flex items-center">
+                    <i class="fas fa-plus-circle mr-2"></i>Add Routine Entry
+                </h4>
+                <form id="addRoutineForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                    <div>
+                        <label for="routine-course-id" class="block text-sm font-medium text-gray-700">Course ID</label>
+                        <input type="text" id="routine-course-id" name="course_id" placeholder="e.g., CS101" required
+                               class="mt-1 w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label for="routine-subject-name" class="block text-sm font-medium text-gray-700">Subject Name</label>
+                        <input type="text" id="routine-subject-name" name="subject_name" placeholder="e.g., Data Structures" required
+                               class="mt-1 w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label for="routine-day-of-week" class="block text-sm font-medium text-gray-700">Day of Week</label>
+                        <select id="routine-day-of-week" name="day_of_week" required
+                                class="mt-1 w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
+                            <option value="Sunday">Sunday</option>
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="routine-course-time" class="block text-sm font-medium text-gray-700">Course Time</label>
+                        <input type="time" id="routine-course-time" name="course_time" required
+                               class="mt-1 w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
+                    </div>
+                    <button type="submit"
+                            class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-md shadow-md transition duration-150 ease-in-out flex items-center justify-center h-10 md:mt-6">
+                        <i class="fas fa-plus mr-2"></i>Add Routine
+                    </button>
+                </form>
+                <div id="addRoutineFormMessage" class="text-sm mt-2 hidden"></div>
+            </div>
+
+            <!-- Routine Display Area -->
+            <div id="routine-display-area" class="hidden">
+                <h4 id="routine-list-title" class="text-2xl font-semibold text-purple-700 mb-6 flex items-center">
+                    <i class="fas fa-clipboard-list mr-3"></i>Routine for Semester <span id="selected-semester-span"></span>
+                </h4>
+                <div class="overflow-x-auto bg-white rounded-lg shadow">
+                    <table class="min-w-full table-auto">
+                        <thead class="bg-purple-100">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">Course ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">Subject Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">Day</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-purple-800 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="class-routine-table-body" class="bg-white divide-y divide-gray-200">
+                            <!-- Routine data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="no-class-routine-message" class="hidden text-center py-6 text-gray-500 text-lg">
+                    <i class="fas fa-info-circle mr-2"></i>No routine found for this semester. Add entries using the form above.
+                </div>
+            </div>
+             <div id="select-semester-prompt" class="text-center py-10 text-gray-500 text-xl">
+                <i class="fas fa-hand-point-up fa-2x mb-3 text-purple-400"></i>
+                <p>Please select a semester to view or manage class routines.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Edit Routine Modal -->
+        <div id="editRoutineModal" class="fixed inset-0 bg-gray-800 bg-opacity-60 hidden overflow-y-auto h-full w-full z-[100] items-center justify-center">
+            <div class="relative p-8 border w-full max-w-lg shadow-2xl rounded-xl bg-white transform transition-all duration-300 ease-out">
+                <div class="flex justify-between items-center mb-6 pb-3 border-b">
+                    <h3 class="text-2xl font-bold text-purple-700">Edit Routine Entry</h3>
+                    <button onclick="closeEditRoutineModal()" class="text-gray-500 hover:text-red-600 transition duration-150">
+                        <i class="fas fa-times fa-lg"></i>
+                    </button>
+                </div>
+                <form id="editRoutineForm" class="space-y-4">
+                    <input type="hidden" id="edit-routine-id" name="id">
+                    <input type="hidden" id="edit-routine-original-semester" name="original_semester">
+                     <div>
+                        <label for="edit-routine-semester" class="block text-sm font-semibold text-gray-700 mb-1">Semester</label>
+                        <select id="edit-routine-semester" name="semester" required
+                                class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-purple-500">
+                            <option value="1">Semester 1</option>
+                            <option value="2">Semester 2</option>
+                            <option value="3">Semester 3</option>
+                            <option value="4">Semester 4</option>
+                            <option value="5">Semester 5</option>
+                            <option value="6">Semester 6</option>
+                            <option value="7">Semester 7</option>
+                            <option value="8">Semester 8</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="edit-routine-course-id" class="block text-sm font-semibold text-gray-700 mb-1">Course ID</label>
+                        <input type="text" id="edit-routine-course-id" name="course_id" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label for="edit-routine-subject-name" class="block text-sm font-semibold text-gray-700 mb-1">Subject Name</label>
+                        <input type="text" id="edit-routine-subject-name" name="subject_name" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label for="edit-routine-day-of-week" class="block text-sm font-semibold text-gray-700 mb-1">Day of Week</label>
+                        <select id="edit-routine-day-of-week" name="day_of_week" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-purple-500">
+                            <option value="Sunday">Sunday</option>
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="edit-routine-course-time" class="block text-sm font-semibold text-gray-700 mb-1">Course Time</label>
+                        <input type="time" id="edit-routine-course-time" name="course_time" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div id="editRoutineFormMessage" class="text-sm mt-2 hidden"></div>
+                    <div class="flex justify-end space-x-4 pt-6 border-t">
+                        <button type="submit" class="px-6 py-2.5 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-200">
+                            <i class="fas fa-save mr-2"></i>Update Routine
+                        </button>
+                        <button type="button" onclick="closeEditRoutineModal()" class="px-6 py-2.5 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition duration-200">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Profile Content (Static Display) -->
+        <section id="profile-content" class="hidden space-y-6">
+          <h3 class="text-2xl font-semibold text-gray-700">Admin Profile</h3>
+          <div class="bg-white p-6 rounded-lg shadow-md">
+              <div class="flex items-center space-x-6">
+                  <div class="relative">
+                      <!-- Using a placeholder for the admin image, replace with actual image if available -->
+                      <div class="w-24 h-24 rounded-full bg-blue-500 flex items-center justify-center text-white text-4xl font-semibold mb-4">
+                          A <!-- Or use a generic icon <i class="fas fa-user-shield"></i> -->
+                      </div>
+                      <!-- If actual image: <img src="{{ admin_profile.photo_url_or_placeholder }}" alt="Admin Profile" class="w-24 h-24 rounded-full object-cover mb-4"> -->
+                  </div>
+                  <div>
+                      <h4 class="text-xl font-semibold text-gray-800">{{ admin_profile.name if admin_profile else 'Admin User' }}</h4>
+                      <p class="text-gray-600">{{ admin_profile.email if admin_profile else 'admin@example.com' }}</p>
+                      <!-- Add more profile details here if needed -->
+                  </div>
+              </div>
+              <div class="mt-6">
+                  <h5 class="text-lg font-semibold text-gray-700 mb-2">Admin Information</h5>
+                  <p class="text-gray-600">This is the account for the system administrator.</p>
+                  <p class="text-gray-600 mt-2">Username: <span class="font-medium">admin</span></p>
+                  <!-- You can add "Change Password" or "Edit Profile" buttons here if functionality exists -->
+              </div>
+          </div>
+        </section>
+
+        <!-- Add Class Modal -->
+        <div id="addClassModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50 items-center justify-center">
+          <div class="relative p-8 border w-full max-w-md shadow-2xl rounded-lg bg-white">
+            <div class="flex justify-between items-center mb-6">
+              <h3 class="text-2xl font-bold text-gray-800">Add New Class</h3>
+              <button onclick="closeAddClassModal()" class="text-gray-500 hover:text-gray-700"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="addClassForm" class="space-y-4">
+              <div>
+                <label for="class-name" class="block text-sm font-semibold text-gray-700 mb-1">Class Name/Subject</label>
+                <input type="text" id="class-name" name="class_name" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500">
+              </div>
+              <div>
+                <label for="class-day-time" class="block text-sm font-semibold text-gray-700 mb-1">Day & Time (e.g., Mon, 9:00 AM)</label>
+                <input type="text" id="class-day-time" name="day_time" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500">
+              </div>
+              <div>
+                <label for="class-faculty" class="block text-sm font-semibold text-gray-700 mb-1">Faculty</label>
+                <input type="text" id="class-faculty" name="faculty" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500">
+              </div>
+              <div>
+                <label for="class-semester" class="block text-sm font-semibold text-gray-700 mb-1">Semester</label>
+                <select id="class-semester" name="semester" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500">
+                  <option value="">Select Semester</option>
+                  <option value="1">1st Semester</option>
+                  <option value="2">2nd Semester</option>
+                  <option value="3">3rd Semester</option>
+                  <option value="4">4th Semester</option>
+                  <option value="5">5th Semester</option>
+                  <option value="6">6th Semester</option>
+                  <option value="7">7th Semester</option>
+                  <option value="8">8th Semester</option>
+                </select>
+              </div>
+              <div class="flex justify-end space-x-4 pt-4 border-t">
+                <button type="submit" class="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700">Add Class</button>
+                <button type="button" onclick="closeAddClassModal()" class="px-6 py-2.5 bg-gray-500 text-white font-medium rounded-lg hover:bg-gray-600">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Edit Class Modal -->
+        <div id="editClassModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50 items-center justify-center">
+          <div class="relative p-8 border w-full max-w-md shadow-2xl rounded-lg bg-white">
+            <div class="flex justify-between items-center mb-6">
+              <h3 class="text-2xl font-bold text-gray-800">Edit Class</h3>
+              <button onclick="closeEditClassModal()" class="text-gray-500 hover:text-gray-700"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="editClassForm" class="space-y-4">
+              <input type="hidden" id="edit-class-id">
+              <div>
+                <label for="edit-class-name" class="block text-sm font-semibold text-gray-700 mb-1">Class Name/Subject</label>
+                <input type="text" id="edit-class-name" name="class_name" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500">
+              </div>
+              <div>
+                <label for="edit-class-day-time" class="block text-sm font-semibold text-gray-700 mb-1">Day & Time</label>
+                <input type="text" id="edit-class-day-time" name="day_time" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500">
+              </div>
+              <div>
+                <label for="edit-class-faculty" class="block text-sm font-semibold text-gray-700 mb-1">Faculty</label>
+                <input type="text" id="edit-class-faculty" name="faculty" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500">
+              </div>
+               <div>
+                <label for="edit-class-semester" class="block text-sm font-semibold text-gray-700 mb-1">Semester</label>
+                <select id="edit-class-semester" name="semester" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500">
+                  <option value="">Select Semester</option>
+                  <option value="1">1st Semester</option>
+                  <option value="2">2nd Semester</option>
+                  <option value="3">3rd Semester</option>
+                  <option value="4">4th Semester</option>
+                  <option value="5">5th Semester</option>
+                  <option value="6">6th Semester</option>
+                  <option value="7">7th Semester</option>
+                  <option value="8">8th Semester</option>
+                </select>
+              </div>
+              <div class="flex justify-end space-x-4 pt-4 border-t">
+                <button type="submit" class="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700">Update Class</button>
+                <button type="button" onclick="closeEditClassModal()" class="px-6 py-2.5 bg-gray-500 text-white font-medium rounded-lg hover:bg-gray-600">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Add Announcement Modal -->
+        <div id="addAnnouncementModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50 items-center justify-center">
+          <div class="relative p-8 border w-full max-w-lg shadow-2xl rounded-lg bg-white">
+            <div class="flex justify-between items-center mb-6">
+              <h3 class="text-2xl font-bold text-gray-800">Add New Announcement</h3>
+              <button onclick="closeAddAnnouncementModal()" class="text-gray-500 hover:text-gray-700"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="addAnnouncementForm" class="space-y-4">
+              <div class="mb-4">
+                <label for="announcement-title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                <input type="text" id="announcement-title" name="title" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500">
+                <span id="add-title-error" class="text-red-500 text-xs mt-1"></span>
+              </div>
+              <div>
+                <label for="announcement-content" class="block text-sm font-semibold text-gray-700 mb-1">Content</label>
+                <textarea id="announcement-content" name="content" rows="4" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500"></textarea>
+              </div>
+              <div class="flex justify-end space-x-4 pt-4 border-t">
+                <button type="submit" class="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700">Add Announcement</button>
+                <button type="button" onclick="closeAddAnnouncementModal()" class="px-6 py-2.5 bg-gray-500 text-white font-medium rounded-lg hover:bg-gray-600">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Edit Announcement Modal -->
+        <div id="editAnnouncementModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50 items-center justify-center">
+          <div class="relative p-8 border w-full max-w-lg shadow-2xl rounded-lg bg-white">
+            <div class="flex justify-between items-center mb-6">
+              <h3 class="text-2xl font-bold text-gray-800">Edit Announcement</h3>
+              <button onclick="closeEditAnnouncementModal()" class="text-gray-500 hover:text-gray-700"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="editAnnouncementForm" class="space-y-4">
+              <input type="hidden" id="edit-announcement-id" name="id">
+              <div>
+                <label for="edit-announcement-title" class="block text-sm font-semibold text-gray-700 mb-1">Title</label>
+                <input type="text" id="edit-announcement-title" name="title" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500">
+              </div>
+              <div>
+                <label for="edit-announcement-content" class="block text-sm font-semibold text-gray-700 mb-1">Content</label>
+                <textarea id="edit-announcement-content" name="content" rows="4" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500"></textarea>
+              </div>
+              <div id="editAnnouncementFormMessage" class="text-sm mt-2 hidden"></div>
+              <div class="flex justify-end space-x-4 pt-4 border-t">
+                <button type="submit" class="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700">Update Announcement</button>
+                <button type="button" onclick="closeEditAnnouncementModal()" class="px-6 py-2.5 bg-gray-500 text-white font-medium rounded-lg hover:bg-gray-600">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+  <script src="/static/js/loader.js"></script>
+  <script src="/static/js/admin.js"></script>
+
+  <script>
+    function loadTodayAttendanceSummary() {
+        const snapshotBody = document.getElementById('today-attendance-snapshot-body');
+        
+        fetch('/Admin/reports/today_attendance_summary')
+            .then(response => response.json())
+            .then(data => {
+                snapshotBody.innerHTML = ''; // Clear previous data or loading messages
+                if (data.success) {
+                    const semesters = Object.keys(data.summary).filter(key => key !== 'all');
+                    
+                    if (semesters.length === 0) {
+                        snapshotBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-500">No attendance data for today.</td></tr>';
+                    } else {
+                        semesters.sort().forEach(semester => {
+                            const summary = data.summary[semester];
+                            const row = `
+                                <tr class="border-b border-gray-200 hover:bg-gray-50">
+                                    <td class="py-3 px-4 text-sm font-medium text-gray-700">${semester}</td>
+                                    <td class="py-3 px-4 text-sm text-green-600 font-semibold">${summary.present}</td>
+                                    <td class="py-3 px-4 text-sm text-red-600 font-semibold">${summary.absent}</td>
+                                    <td class="py-3 px-4 text-sm text-blue-600 font-semibold">${summary.total}</td>
+                                </tr>
+                            `;
+                            snapshotBody.innerHTML += row;
+                        });
+                    }
+
+                    if (data.summary.all) {
+                        if (typeof renderTodayAttendanceChart === 'function') {
+                           renderTodayAttendanceChart(data.summary.all.present, data.summary.all.absent);
+                        }
+                        if(document.getElementById('present-count')) {
+                           document.getElementById('present-count').textContent = data.summary.all.present;
+                           document.getElementById('absent-count').textContent = data.summary.all.absent;
+                           document.getElementById('total-count').textContent = data.summary.all.total;
+                        }
+                    }
+                } else {
+                    snapshotBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-red-500">Error loading data.</td></tr>';
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching today's attendance:", error);
+                snapshotBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-red-500">Error loading data.</td></tr>';
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.showSection) {
+            const originalShowSection = window.showSection;
+            window.showSection = function(sectionId, element) {
+                originalShowSection(sectionId, element);
+                if (sectionId === 'dashboard') {
+                    loadTodayAttendanceSummary();
+                    if (typeof loadDashboardCards === 'function') {
+                        loadDashboardCards();
+                    }
+                }
+            };
+        }
+        // Initial load for dashboard
+        loadTodayAttendanceSummary();
+    });
+  </script>
+
+  <style>
+  /* For Webkit-based browsers (Chrome, Safari, Edge) */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Light grey track */
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #888; /* Dark grey thumb */
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Darker thumb on hover */
+  }
+
+  /* For Firefox */
+  .custom-scrollbar {
+    scrollbar-width: thin; /* "auto" or "thin" */
+    scrollbar-color: #888 #f1f1f1; /* thumb and track color */
+  }
+  </style>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const clearAllBtn = document.getElementById('clear-all-notifications-btn');
+    if (clearAllBtn) {
+      clearAllBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        clearAllNotifications();
+      });
+    }
+
+    // --- Today's Attendance Snapshot Logic ---
+    let todayAttendanceChart = null;
+
+    function loadTodayAttendanceSummary() {
+        fetch('/Admin/reports/today_attendance_summary')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const summary = data.summary;
+                    document.getElementById('present-count').textContent = summary.present;
+                    document.getElementById('absent-count').textContent = summary.absent;
+                    document.getElementById('total-count').textContent = summary.total;
+
+                    renderTodayAttendanceChart(summary.present, summary.absent);
+                } else {
+                    console.error('Failed to load today\'s summary:', data.error);
+                }
+            })
+            .catch(error => console.error('Error fetching today\'s summary:', error));
+    }
+
+    function renderTodayAttendanceChart(present, absent) {
+        const ctx = document.getElementById('today-attendance-chart').getContext('2d');
+        if (todayAttendanceChart) {
+            todayAttendanceChart.destroy();
+        }
+        todayAttendanceChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Present', 'Absent'],
+                datasets: [{
+                    data: [present, absent],
+                    backgroundColor: ['#10B981', '#EF4444'],
+                    hoverBackgroundColor: ['#059669', '#DC2626'],
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                size: 14,
+                                family: 'Inter'
+                            },
+                            color: '#4B5563'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // --- Attendance Report Logic ---
+    const generateReportBtn = document.getElementById('generate-report-btn');
+    const semesterSelect = document.getElementById('report-semester-select');
+    const dateInput = document.getElementById('report-date-input');
+    const reportTbody = document.getElementById('attendance-report-tbody');
+    const reportMessageArea = document.getElementById('report-message-area');
+
+    // Set default date to today
+    dateInput.value = new Date().toISOString().split('T')[0];
+
+    generateReportBtn.addEventListener('click', function() {
+        const semester = semesterSelect.value;
+        const date = dateInput.value;
+
+        if (!semester || !date) {
+            reportMessageArea.textContent = 'Please select both a semester and a date.';
+            reportMessageArea.style.color = 'red';
+            return;
+        }
+
+        reportTbody.innerHTML = '<tr><td colspan="3" class="text-center py-4">Loading report...</td></tr>';
+        reportMessageArea.textContent = '';
+
+        fetch(`/Admin/reports/attendance_by_semester?semester=${semester}&date=${date}`)
+            .then(response => response.json())
+            .then(data => {
+                reportTbody.innerHTML = ''; // Clear loading message
+                if (data.success && data.report.length > 0) {
+                    data.report.forEach(student => {
+                        const statusClass = student.status === 'Present' ? 'text-green-600 bg-green-100' : 'text-red-600 bg-red-100';
+                        const row = `
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${student.id}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${student.name}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
+                                        ${student.status}
+                                    </span>
+                                </td>
+                            </tr>
+                        `;
+                        reportTbody.innerHTML += row;
+                    });
+                } else if (data.success && data.report.length === 0) {
+                    reportMessageArea.textContent = 'No students found for this semester.';
+                } else {
+                    reportMessageArea.textContent = data.error || 'Failed to generate report.';
+                    reportMessageArea.style.color = 'red';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching attendance report:', error);
+                reportTbody.innerHTML = '';
+                reportMessageArea.textContent = 'An error occurred while fetching the report.';
+                reportMessageArea.style.color = 'red';
+            });
+    });
+  });
+  </script>
+</body>
+</html>

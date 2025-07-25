@@ -1,0 +1,4 @@
+Flask==2.3.2
+Flask-MySQLdb==1.0.1
+mysql-connector-python==8.1.0
+python-dotenv==1.0.0

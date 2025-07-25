@@ -1,0 +1,158 @@
+/* Student Dashboard Specific Styles */
+
+/* Dropdown Menu */
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  padding: 0.5rem 0;
+  z-index: 50;
+  min-width: 10rem;
+  margin-top: 0.5rem;
+  display: none;
+}
+
+.dropdown-menu.show {
+  display: block;
+}
+
+.dropdown-menu a {
+  display: block;
+  padding: 0.75rem 1rem;
+  color: #4b5563;
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.dropdown-menu a:hover {
+  background-color: #f3f4f6;
+}
+
+/* Active Sidebar Link */
+.sidebar-link.active {
+  background-color: #2563EB; /* Tailwind blue-600 */
+  color: white;
+  font-weight: 600; /* Make active link a bit bolder */
+  box-shadow: inset 2px 0 0px rgba(255, 255, 255, 0.4); /* Subtle inner highlight */
+}
+
+.sidebar-link:not(.active):hover {
+  background-color: #1D4ED8; /* Tailwind blue-700 or a darker shade */
+}
+
+/* Camera Placeholder */
+#camera-placeholder {
+  width: 100%;
+  height: 200px;
+  border: 2px dashed #d1d5db;
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #f9fafb;
+}
+
+/* Course Card Hover Effect */
+.course-card {
+  transition: all 0.3s ease;
+}
+
+.course-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: auto;
+    z-index: 40;
+  }
+  
+  .main-content {
+    margin-left: 0;
+    padding-bottom: 5rem;
+  }
+}
+
+body, html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  /* background: #f3f4f6; */ /* Removed to allow HTML body class to take precedence */
+}
+
+.flex {
+  display: flex;
+}
+
+.h-screen {
+  height: 100vh;
+}
+
+.w-screen {
+  width: 100vw;
+}
+
+.fixed {
+  position: fixed;
+}
+
+.bg-white {
+  background: #fff !important;
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+}
+
+.overflow-y-auto {
+  overflow-y: auto;
+}
+
+.p-6 {
+  padding: 1.5rem;
+}
+
+.max-w-full {
+  max-width: 100vw;
+}
+
+.min-h-screen {
+  min-height: 100vh;
+}
+
+/* Remove blue background from main content */
+main, .main-content, .flex-1 {
+  /* background: #fff !important; */ /* Removed !important */
+  background: var(--main-content-bg, #f9fafb); /* Default to a light gray, can be overridden by Tailwind on the element */
+}
+
+/* Sidebar border for separation */
+aside {
+  border-right: 1px solid #e5e7eb;
+  z-index: 40;
+}
+
+/* Camera UI */
+#camera-stream {
+  width: 100%;
+  max-width: 400px;
+  height: 300px;
+  border-radius: 0.5rem;
+  margin: 0 auto 1rem auto;
+  background: #000;
+  display: block;
+}
+#capture-btn[disabled] {
+  background: #ccc;
+  cursor: not-allowed;
+} 

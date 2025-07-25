@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/student.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon"href="../static/uploads/favicon.png">
+</head>
+<body class="bg-gray-100 dark:bg-slate-900 font-sans antialiased">
+  <div class="flex h-screen w-screen overflow-hidden">
+    <aside class="w-64 bg-gradient-to-b from-blue-700 to-blue-800 dark:from-blue-800 dark:to-blue-900 text-blue-100 dark:text-blue-200 shadow-xl p-5 space-y-6 h-screen fixed left-0 top-0 z-40 flex flex-col transition-all duration-300 ease-in-out">
+      <div class="flex items-center space-x-3 mb-6 px-2">
+        <i class="fas fa-user-graduate fa-3x text-white dark:text-blue-300"></i>
+        <h1 class="text-2xl font-bold text-white dark:text-blue-200">Student Portal</h1>
+      </div>
+      <nav class="space-y-2 flex-grow">
+        <a href="javascript:void(0);" id="nav-student-dashboard" class="sidebar-link active flex items-center space-x-3 p-3 rounded-lg text-blue-100 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-700 dark:hover:text-blue-100 dark:active:bg-blue-600 dark:active:text-white" onclick="showStudentSection('student-dashboard', this)">
+          <i class="fas fa-home fa-fw w-6 text-center"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="javascript:void(0);" id="nav-my-attendance" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg text-blue-100 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-700 dark:hover:text-blue-100" onclick="showStudentSection('my-attendance', this)">
+          <i class="fas fa-calendar-check fa-fw w-6 text-center"></i>
+          <span>My Attendance</span>
+        </a>
+        <a href="javascript:void(0);" id="nav-student-profile" class="sidebar-link flex items-center space-x-3 p-3 rounded-lg text-blue-100 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-700 dark:hover:text-blue-100" onclick="showStudentSection('student-profile', this)">
+          <i class="fas fa-id-card fa-fw w-6 text-center"></i>
+          <span>My Profile</span>
+        </a>
+        <a href="javascript:void(0);" id="nav-student-class-routine" class="sidebar-link group flex items-center space-x-3 p-3 rounded-lg text-blue-100 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-700 dark:hover:text-blue-100" onclick="showStudentSection('student-class-routine', this)">
+          <i class="fas fa-calendar-alt fa-fw w-6 text-center"></i>
+          <span class="font-medium">Class Routine</span>
+        </a>
+      </nav>
+      <div class="pt-6 border-t border-blue-700 dark:border-blue-600">
+        <p class="text-xs text-blue-300 dark:text-blue-400 text-center">Student Portal &copy; 2025</p>
+      </div>
+    </aside>
+    <div class="ml-64 flex-1 h-screen bg-gray-50 dark:bg-slate-800 overflow-y-auto">
+      <main class="p-6 w-full max-w-full min-h-screen">
+        <header class="flex justify-between items-center mb-8 pb-4">
+          <h2 id="student-main-title" class="text-3xl font-semibold text-gray-700 dark:text-slate-200 hidden">Dashboard</h2>
+          <div class="flex-grow"></div>
+          <div class="flex items-center space-x-4">
+            <div id="student-clock" class="text-sm font-medium text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-700 px-4 py-2 rounded-lg shadow-sm flex items-center space-x-2">
+                <!-- Clock content will be filled by JS -->
+            </div>
+
+          <!--  <div class="flex items-center">
+              <button id="darkModeToggle" type="button" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-slate-800 bg-gray-300 dark:bg-blue-600">
+                <span class="sr-only">Toggle dark mode</span>
+                <span id="darkModeToggleKnob" class="inline-block w-4 h-4 transform bg-white dark:bg-slate-200 rounded-full transition-transform duration-200 ease-in-out translate-x-1 dark:translate-x-6">
+                </span>
+              </button>
+            </div>-->
+
+            <div class="relative">
+              <button id="student-profile-dropdown-button" onclick="toggleStudentDropdown('student-profile-dropdown')" class="flex items-center text-gray-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+                <img src="https://placehold.co/40x40/A0AEC0/FFFFFF?text=S" alt="Student" id="header-student-avatar" class="w-8 h-8 rounded-full object-cover mr-2 border-2 border-transparent group-hover:border-blue-300 dark:group-hover:border-blue-500">
+                <span class="font-medium mr-1" id="student-dynamic-name">Student Name</span> 
+                <i class="fas fa-chevron-down fa-xs text-gray-500 dark:text-slate-400"></i>
+              </button>
+              <div id="student-profile-dropdown" class="dropdown-menu w-48 dark:bg-slate-700 dark:border-slate-600">
+                <a href="javascript:void(0);" onclick="showStudentSection('student-profile', document.getElementById('nav-student-profile')); toggleStudentDropdown('student-profile-dropdown'); return false;" class="flex items-center dark:text-slate-200 dark:hover:bg-slate-600"><i class="fas fa-user-edit fa-fw mr-2 w-5"></i>View Profile</a>
+                <a href="{{ url_for('logout') }}" class="flex items-center dark:text-slate-200 dark:hover:bg-slate-600"><i class="fas fa-sign-out-alt fa-fw mr-2 w-5"></i>Logout</a>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <section id="student-dashboard-content" class="space-y-8 mt-4">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            <div class="lg:col-span-2 space-y-6">
+              <div>
+                <div class="flex items-center space-x-3 mb-1">
+                  <i class="fas fa-hand-sparkles fa-2x text-yellow-500 dark:text-yellow-400"></i>
+                  <h2 class="text-3xl font-semibold text-gray-800 dark:text-slate-100">Welcome back, <span id="welcome-student-name" class="text-blue-600 dark:text-blue-400">Student</span>!</h2>
+                </div>
+                <p class="text-gray-600 dark:text-slate-400 mt-1 mb-4 ml-12">
+                  Here are some quick things you can do today:
+                </p>
+              </div>
+
+              <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow flex flex-col">
+                <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-200 dark:border-slate-700">
+                  <h4 class="text-xl font-semibold text-gray-700 dark:text-slate-100 flex items-center"><i class="fas fa-calendar-day fa-fw text-blue-500 dark:text-blue-400 mr-3"></i>Today's Upcoming Classes</h4>
+                  <a href="#" onclick="showStudentSection('student-class-routine', document.getElementById('nav-student-class-routine')); return false;" class="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium">View Full Schedule <i class="fas fa-arrow-right fa-xs ml-1"></i></a>
+                </div>
+                <ul id="student-upcoming-classes-list" class="space-y-4 flex-grow">
+                  <li class="p-4 bg-blue-50 dark:bg-slate-700 rounded-lg hover:bg-blue-100 dark:hover:bg-slate-600 transition-colors duration-200">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <h5 class="font-semibold text-blue-700 dark:text-blue-400">COMP 301: Advanced Algorithms</h5>
+                        <p class="text-sm text-gray-600 dark:text-slate-300"><i class="far fa-clock fa-fw"></i> 10:00 AM - 11:30 AM</p>
+                        <p class="text-xs text-gray-500 dark:text-slate-400"><i class="fas fa-chalkboard-teacher fa-fw"></i> Prof. Einstein</p>
+                      </div>
+                      <a href="#" class="ml-4 px-3 py-1.5 bg-blue-500 text-white text-xs font-semibold rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 transition-colors whitespace-nowrap">Join Class</a>
+                    </div>
+                  </li>
+                  <li class="p-4 bg-gray-50 dark:bg-slate-700 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors duration-200">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <h5 class="font-semibold text-gray-700 dark:text-slate-200">MATH 202: Linear Algebra</h5>
+                        <p class="text-sm text-gray-600 dark:text-slate-300"><i class="far fa-clock fa-fw"></i> 01:00 PM - 02:30 PM</p>
+                      </div>
+                       <a href="#" class="ml-4 px-3 py-1.5 bg-gray-400 text-white text-xs font-semibold rounded-md hover:bg-gray-500 dark:bg-gray-500 dark:hover:bg-gray-400 transition-colors whitespace-nowrap">Details</a>
+                    </div>
+                  </li>
+                  <li id="loading-classes-placeholder" class="text-center py-4 text-gray-500 dark:text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i>Loading classes...</li>
+                </ul>
+              </div>
+
+              <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow flex flex-col">
+                <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-200 dark:border-slate-700">
+                  <h4 class="text-xl font-semibold text-gray-700 dark:text-slate-100 flex items-center"><i class="fas fa-bullhorn fa-fw text-yellow-500 dark:text-yellow-400 mr-3"></i>Recent Announcements</h4>
+                  <a href="#" class="text-sm text-yellow-600 hover:text-yellow-700 dark:text-yellow-400 dark:hover:text-yellow-300 font-medium">View All <i class="fas fa-arrow-right fa-xs ml-1"></i></a>
+                </div>
+                <ul id="student-recent-announcements-list" class="space-y-3 flex-grow max-h-80 overflow-y-auto">
+                  <li class="p-3 border border-transparent hover:border-yellow-200 dark:hover:border-yellow-700 hover:bg-yellow-50 dark:hover:bg-slate-700 rounded-lg transition-all duration-200">
+                    <h5 class="font-semibold text-yellow-700 dark:text-yellow-400 mb-1">Midterm Exam Schedule Update</h5>
+                    <p class="text-sm text-gray-600 dark:text-slate-300 leading-relaxed line-clamp-2">The midterm exam schedule for Fall 2024 has been updated. Please check the portal for the revised dates and timings for your courses...</p>
+                    <p class="text-xs text-gray-400 dark:text-slate-500 mt-2 text-right">Oct 26, 2023</p>
+                  </li>
+                  <li class="p-3 border border-transparent hover:border-gray-200 dark:hover:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 rounded-lg transition-all duration-200">
+                    <h5 class="font-medium text-gray-700 dark:text-slate-200 mb-1">Library Hours Extended</h5>
+                    <p class="text-sm text-gray-600 dark:text-slate-300 leading-relaxed line-clamp-2">Good news! The main library will have extended hours during the upcoming exam period. Open until 2 AM on weekdays.</p>
+                    <p class="text-xs text-gray-400 dark:text-slate-500 mt-2 text-right">Oct 24, 2023</p>
+                  </li>
+                  <li id="loading-announcements-placeholder" class="text-center py-4 text-gray-500 dark:text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i>Loading announcements...</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow row-start-1 lg:row-auto lg:mt-0 mt-6 lg:sticky lg:top-6">
+              <h4 class="text-xl font-semibold text-gray-700 dark:text-slate-100 mb-4 flex items-center">
+                <i class="fas fa-rocket text-teal-600 dark:text-teal-400 mr-3"></i>Quick Actions
+              </h4>
+              <ul class="space-y-3">
+
+                <li>
+                  <a href="javascript:void(0);" onclick="showStudentSection('my-attendance', document.getElementById('nav-my-attendance'));" class="group flex items-center p-3 bg-gray-50 dark:bg-slate-700 hover:bg-teal-50 dark:hover:bg-teal-600 rounded-lg transition-all duration-200 ease-in-out transform hover:scale-105">
+                    <div class="p-2 bg-teal-100 dark:bg-teal-800 rounded-md group-hover:bg-teal-200 dark:group-hover:bg-teal-700 transition-colors">
+                      <i class="fas fa-history w-5 h-5 text-teal-600 dark:text-teal-300 group-hover:text-teal-700 dark:group-hover:text-teal-200"></i>
+                    </div>
+                    <span class="ml-3 font-medium text-gray-700 dark:text-slate-200 group-hover:text-teal-800 dark:group-hover:text-teal-100">View Attendance History</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="javascript:void(0);" onclick="showStudentSection('student-profile', document.getElementById('nav-student-profile'));" class="group flex items-center p-3 bg-gray-50 dark:bg-slate-700 hover:bg-teal-50 dark:hover:bg-teal-600 rounded-lg transition-all duration-200 ease-in-out transform hover:scale-105">
+                    <div class="p-2 bg-teal-100 dark:bg-teal-800 rounded-md group-hover:bg-teal-200 dark:group-hover:bg-teal-700 transition-colors">
+                      <i class="fas fa-id-card w-5 h-5 text-teal-600 dark:text-teal-300 group-hover:text-teal-700 dark:group-hover:text-teal-200"></i>
+                    </div>
+                    <span class="ml-3 font-medium text-gray-700 dark:text-slate-200 group-hover:text-teal-800 dark:group-hover:text-teal-100">My Profile</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="javascript:void(0);" onclick="showStudentSection('student-class-routine', document.getElementById('nav-student-class-routine'));" class="group flex items-center p-3 bg-gray-50 dark:bg-slate-700 hover:bg-teal-50 dark:hover:bg-teal-600 rounded-lg transition-all duration-200 ease-in-out transform hover:scale-105">
+                    <div class="p-2 bg-teal-100 dark:bg-teal-800 rounded-md group-hover:bg-teal-200 dark:group-hover:bg-teal-700 transition-colors">
+                      <i class="fas fa-calendar-alt w-5 h-5 text-teal-600 dark:text-teal-300 group-hover:text-teal-700 dark:group-hover:text-teal-200"></i>
+                    </div>
+                    <span class="ml-3 font-medium text-gray-700 dark:text-slate-200 group-hover:text-teal-800 dark:group-hover:text-teal-100">View Class Routine</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="my-attendance-content" class="space-y-6">
+          <h3 class="text-2xl font-semibold text-gray-700 dark:text-slate-100">My Attendance</h3>
+          <div class="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-lg shadow-md">
+
+              
+              <div id="camera-container" class="my-4 hidden bg-gray-100 dark:bg-slate-700 p-4 rounded-lg text-center relative border border-gray-300 dark:border-slate-600">
+                  <video id="webcam-feed" width="640" height="480" autoplay class="rounded-md border border-gray-400 dark:border-slate-500 mx-auto bg-black"></video>
+                  <canvas id="bounding-box-canvas" width="640" height="480" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" style="border: 2px solid transparent; z-index:10;"></canvas> 
+                  <div id="realtime-status-overlay" class="absolute top-2 left-2 p-2 rounded-md text-white font-semibold text-lg pointer-events-none hidden" style="background-color: rgba(0,0,0,0.6); z-index: 15;">
+                      <!-- Content will be set by JavaScript -->
+                  </div>
+                  <canvas id="capture-canvas" class="hidden"></canvas>
+                  
+                  <div id="video-overlay" class="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center pointer-events-none hidden">
+                      <p id="identified-name" class="text-2xl font-bold text-white bg-black bg-opacity-60 dark:bg-opacity-70 px-4 py-2 rounded"></p>
+                      <p id="identified-id" class="text-lg text-white bg-black bg-opacity-60 dark:bg-opacity-70 px-3 py-1 rounded mt-1"></p>
+                      <p id="countdown-timer" class="text-5xl font-bold text-red-500 dark:text-red-400 mt-4"></p>
+                  </div>
+
+                  <div class="mt-4 flex flex-col items-center">
+                      <button id="cancel-capture-btn" class="w-auto bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center text-sm">
+                          <i class="fas fa-times-circle mr-2"></i>Cancel
+                      </button>
+                      <p id="camera-status" class="text-xs text-gray-600 dark:text-slate-400 mt-2"></p>
+                  </div>
+              </div>
+
+              <h4 class="text-xl font-semibold text-gray-700 dark:text-slate-200 mb-3 mt-5">Attendance Record</h4>
+              <div class="overflow-x-auto shadow-sm rounded-lg border border-gray-200 dark:border-slate-600">
+                  <table class="w-full min-w-full text-sm text-left text-gray-700 dark:text-slate-300">
+                      <thead class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-slate-700 dark:text-slate-300">
+                          <tr>
+                              <th scope="col" class="py-3 px-4 md:px-6">S.N</th>
+                              <th scope="col" class="py-3 px-4 md:px-6">Student Name</th>
+                              <th scope="col" class="py-3 px-4 md:px-6">Semester</th>
+                              <th scope="col" class="py-3 px-4 md:px-6">Date & Time</th>
+                              <th scope="col" class="py-3 px-4 md:px-6">Subject</th>
+                              <th scope="col" class="py-3 px-4 md:px-6">Class</th>
+                              <th scope="col" class="py-3 px-4 md:px-6">Status</th>
+                          </tr>
+                      </thead>
+                      <tbody id="attendance-history-table-body" class="divide-y divide-gray-200 dark:divide-slate-600">
+                          <tr class="bg-white dark:bg-slate-800">
+                              <td colspan="7" class="py-4 px-6 text-center text-gray-500 dark:text-slate-400 italic">Loading attendance history...</td>
+                          </tr>
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+        </section>
+
+        <section id="student-profile-content" class="hidden space-y-6">
+          <h3 class="text-2xl font-semibold text-gray-700 dark:text-slate-100">My Profile</h3>
+          <div class="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-md">
+              <div class="flex flex-col md:flex-row items-center md:space-x-6">
+                  <img src="https://placehold.co/120x120/A0AEC0/FFFFFF?text=S" alt="Student Large" id="profile-large-image" class="w-32 h-32 rounded-full object-cover border-4 border-blue-500 dark:border-blue-400 mb-4 md:mb-0">
+                  <div class="text-center md:text-left">
+                      <h4 class="text-2xl font-semibold text-gray-800 dark:text-slate-100" id="profile-header-name">Student Name Placeholder</h4>
+                      <p class="text-gray-600 dark:text-slate-300" id="profile-header-email">student.email@example.com</p>
+                      <p class="text-gray-500 dark:text-slate-400 text-sm" id="profile-header-id">Student ID: S100X</p>
+                      <p class="text-gray-500 dark:text-slate-400 text-sm" id="profile-header-semester">Current Semester: 3</p>
+                  </div>
+              </div>
+              <div class="mt-8">
+                  <h5 class="text-lg font-semibold text-gray-700 dark:text-slate-200 mb-3">Personal Information</h5>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                          <label for="profile-name" class="block text-sm font-medium text-gray-700 dark:text-slate-300">Full Name</label>
+                          <input type="text" id="profile-name" value="Student Name Placeholder" class="mt-1 block w-full p-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-gray-100 dark:bg-slate-700 dark:text-slate-300 cursor-not-allowed" readonly>
+                      </div>
+                      <div>
+                          <label for="profile-email" class="block text-sm font-medium text-gray-700 dark:text-slate-300">Email Address</label>
+                          <input type="email" id="profile-email" value="student.email@example.com" class="mt-1 block w-full p-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-gray-100 dark:bg-slate-700 dark:text-slate-300 cursor-not-allowed" readonly>
+                      </div>
+                       <div>
+                          <label for="profile-phone" class="block text-sm font-medium text-gray-700 dark:text-slate-300">Phone Number</label>
+                          <input type="tel" id="profile-phone" value="" class="mt-1 block w-full p-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-gray-100 dark:bg-slate-700 dark:text-slate-300 cursor-not-allowed" readonly>
+                      </div>
+                       <div>
+                          <label for="profile-semester-display" class="block text-sm font-medium text-gray-700 dark:text-slate-300">Current Semester</label>
+                          <input type="text" id="profile-semester-display" value="" class="mt-1 block w-full p-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-gray-100 dark:bg-slate-700 dark:text-slate-300 cursor-not-allowed" readonly>
+                      </div>
+                      <div class="md:col-span-2">
+                           <label for="profile-address" class="block text-sm font-medium text-gray-700 dark:text-slate-300">Address</label>
+                          <textarea id="profile-address" rows="3" class="mt-1 block w-full p-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-gray-100 dark:bg-slate-700 dark:text-slate-300 cursor-not-allowed" readonly></textarea>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <div class="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-md mt-6">
+            <h5 class="text-lg font-semibold text-gray-700 dark:text-slate-200 mb-3">Change Password</h5>
+            <form id="change-password-form">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="new-password" class="block text-sm font-medium text-gray-700 dark:text-slate-300">New Password</label>
+                        <input type="password" id="new-password" name="new_password" class="mt-1 block w-full p-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm dark:bg-slate-700 dark:text-slate-300" required minlength="8">
+                    </div>
+                    <div>
+                        <label for="confirm-password" class="block text-sm font-medium text-gray-700 dark:text-slate-300">Confirm New Password</label>
+                        <input type="password" id="confirm-password" name="confirm_password" class="mt-1 block w-full p-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm dark:bg-slate-700 dark:text-slate-300" required minlength="8">
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Update Password</button>
+                </div>
+            </form>
+            <div id="password-update-message" class="mt-4"></div>
+        </div>
+        </section>
+
+        <section id="student-class-routine-content" class="hidden p-6 bg-white dark:bg-slate-800 rounded-lg shadow-md">
+            <h3 id="student-routine-card-title" class="text-2xl font-semibold text-gray-700 dark:text-slate-100 mb-6 flex items-center">
+                <i class="fas fa-calendar-alt text-purple-600 dark:text-purple-400 mr-3"></i>My Class Routine (Semester <span id="student-routine-semester-display"></span>)
+            </h3>
+            <div id="student-class-routine-table-container" class="overflow-x-auto">
+                <!-- Routine table will be generated here by JS -->
+            </div>
+            <p id="no-student-routine-message" class="text-center text-gray-500 dark:text-slate-400 py-4 hidden">
+                <i class="fas fa-info-circle mr-2"></i>Your class routine is not available at the moment.
+            </p>
+        </section>
+
+      </main>
+    </div>
+  </div>
+  <script src="/static/js/loader.js"></script>
+  <script src="/static/js/student.js"></script>
+  <script>
+    // Dark Mode Toggle JavaScript
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    // const darkModeToggleKnob = document.getElementById('darkModeToggleKnob'); // Knob visual state handled by CSS dark: variants
+    const htmlElement = document.documentElement; // Target <html> for dark class
+
+    console.log('Dark mode script initialized.');
+    if (!darkModeToggle) console.error('Dark mode toggle button (darkModeToggle) not found by ID.');
+    if (!htmlElement) console.error('HTML element (document.documentElement) not found.');
+
+    // Function to apply theme state (CSS class on <html> and ARIA attribute)
+    function applyTheme(isDark) {
+      console.log('applyTheme called with isDark:', isDark);
+      if (!htmlElement) {
+        console.error('Cannot apply theme: htmlElement is null.');
+        return;
+      }
+
+      if (isDark) {
+        htmlElement.classList.add('dark');
+        console.log('Applied "dark" class to <html> element.');
+        if (darkModeToggle) darkModeToggle.setAttribute('aria-checked', 'true');
+      } else {
+        htmlElement.classList.remove('dark');
+        console.log('Removed "dark" class from <html> element.');
+        if (darkModeToggle) darkModeToggle.setAttribute('aria-checked', 'false');
+      }
+      // Visual changes to the toggle button (background, knob position) are expected
+      // to be handled by Tailwind CSS reacting to the 'dark' class on the <html> element.
+      // Example button classes: "bg-gray-300 dark:bg-blue-600"
+      // Example knob classes: "translate-x-1 dark:translate-x-6"
+    }
+
+    // Check for saved preference on load and apply it
+    try {
+      const savedDarkMode = localStorage.getItem('darkMode');
+      console.log('Initial localStorage "darkMode" value:', savedDarkMode);
+      applyTheme(savedDarkMode === 'true');
+    } catch (e) {
+      console.error('Error accessing localStorage during initial load:', e);
+      // Fallback or default behavior if localStorage is inaccessible
+      // applyTheme(false); // Or true, depending on preferred default
+    }
+
+    // Event listener for the toggle button
+    if (darkModeToggle) {
+      darkModeToggle.addEventListener('click', () => {
+        console.log('Dark mode toggle button clicked.');
+        if (!htmlElement) {
+            console.error("Cannot toggle theme: htmlElement is null in click listener.");
+            return;
+        }
+
+        // Toggle the 'dark' class on <html> and get the new state.
+        // .toggle() returns true if the class was added (now present), false if removed.
+        const newIsDarkMode = htmlElement.classList.toggle('dark');
+        console.log('HTML classList after toggle. New dark mode state (newIsDarkMode):', newIsDarkMode);
+        console.log('Current classes on <html>:', htmlElement.className);
+
+
+        try {
+          localStorage.setItem('darkMode', newIsDarkMode);
+          console.log('Saved newIsDarkMode to localStorage:', newIsDarkMode);
+        } catch (e) {
+          console.error('Error setting "darkMode" in localStorage:', e);
+        }
+        
+        // Update ARIA attributes based on the new state. Visuals handled by CSS.
+        applyTheme(newIsDarkMode); 
+      });
+    } else {
+      console.warn('Dark mode toggle button not found, so event listener was not attached.');
+    }
+    // End Dark Mode Toggle JavaScript
+
+    document.addEventListener('DOMContentLoaded', function () {
+      // Initial calls to fetch data for the dashboard view
+      if (document.getElementById('student-dashboard-content') && !document.getElementById('student-dashboard-content').classList.contains('hidden')) {
+        // These are likely general dashboard data calls, keep them if student-dashboard is the default view.
+        // fetchStudentProfile(); // This is called by fetchStudentDashboardData in some versions, check student.js if it needs to be separate.
+        // fetchStudentDashboardData(); // This might call profile and other necessary initial data.
+      }
+      // Load student profile data (name, email etc. for header and profile page)
+      // This should be safe to call always as it populates common elements.
+      if (typeof loadStudentProfileData === 'function') loadStudentProfileData(); else console.error('loadStudentProfileData not defined');
+
+      // Initial load for sections that might be visible by default or frequently accessed.
+      // The showStudentSection function will also call specific loaders.
+      if (typeof fetchStudentAttendanceHistory === 'function') fetchStudentAttendanceHistory(); else console.error('fetchStudentAttendanceHistory not defined');
+      if (typeof loadStudentClassRoutine === 'function') loadStudentClassRoutine(); else console.error('loadStudentClassRoutine not defined');
+      // if (typeof loadUpcomingClassesForStudent === 'function') loadUpcomingClassesForStudent();
+      // if (typeof loadRecentAnnouncementsForStudent === 'function') loadRecentAnnouncementsForStudent();
+
+      const markAttendanceBtn = document.getElementById('mark-attendance-btn');
+      const cancelCaptureBtn = document.getElementById('cancel-capture-btn');
+
+      if(markAttendanceBtn) markAttendanceBtn.addEventListener('click', function() {
+        markAttendanceBtn.disabled = true;
+        startWebcam();
+      });
+      else console.error('Mark attendance button not found');
+
+      // Add a global loading spinner element if not present
+      if (!document.getElementById('attendance-loading-spinner')) {
+        const spinner = document.createElement('div');
+        spinner.id = 'attendance-loading-spinner';
+        spinner.style.display = 'none';
+        spinner.innerHTML = '<i class="fas fa-spinner fa-spin text-blue-600 text-3xl"></i><span class="ml-2 text-blue-700 font-medium">Verifying face, please wait...</span>';
+        spinner.className = 'flex flex-row items-center justify-center mt-4';
+        document.getElementById('attendance-message').parentNode.insertBefore(spinner, document.getElementById('attendance-message').nextSibling);
+      }
+      
+      // Explicitly ensure no listener for captureBtn using captureAndVerify is present here.
+      // The old captureAndVerify function was removed.
+      // If captureBtn were to be used, it would need a new purpose or to trigger a part of the new flow.
+      
+      if(cancelCaptureBtn) cancelCaptureBtn.addEventListener('click', stopWebcam);
+      else console.error('Cancel capture button not found');
+
+      // Update clock
+      if (typeof updateStudentClock === 'function') {
+        updateStudentClock();
+        setInterval(updateStudentClock, 60000); // Update every minute
+      } else {
+        console.error('updateStudentClock function not found.');
+      }
+      
+      // Default section to show if none is active (e.g. student-dashboard)
+      // This logic might already be in showStudentSection or how sidebar links are initialized
+      const activeSidebarLink = document.querySelector('.sidebar-link.active');
+      if (activeSidebarLink) {
+        const defaultSectionId = activeSidebarLink.id.replace('nav-', '');
+        // showStudentSection(defaultSectionId, activeSidebarLink); // showStudentSection is called by clicks
+      } else {
+        // If no link is active, default to student-dashboard
+        const dashboardNav = document.getElementById('nav-student-dashboard');
+        if (dashboardNav) {
+            showStudentSection('student-dashboard', dashboardNav);
+        }
+      }
+
+      // Add console logs for debugging camera functions if they are not defined
+      if (typeof startWebcam !== 'function') console.error('startWebcam function not defined');
+      // if (typeof captureAndVerify !== 'function') console.error('captureAndVerify function not defined');
+      if (typeof stopWebcam !== 'function') console.error('stopWebcam function not defined');
+
+    });
+
+    // Keep the webcam and attendance functions (startWebcam, stopWebcam, captureAndVerify, fetchStudentAttendanceHistory) here
+    // ... (These functions were provided in the previous edit and should remain in the <script> tag of student_dashboard.html)
+    window.stream = window.stream || null; // Ensure stream is a global property, guard against re-declaration
+    /* let identificationInterval = null; */ // This was suspected to be in student.js or declared elsewhere
+    let countdownInterval = null; // Restoring this declaration as it's specific to this script's logic
+    let identifiedImageDataUrl = null; // Store the image data URL of the identified face
+    let isAutoCapturing = false; // Flag to manage state
+
+    function resetCaptureState() {
+        console.log(`resetCaptureState called. Current isAutoCapturing: ${isAutoCapturing}, identificationInterval: ${identificationInterval}, countdownInterval: ${countdownInterval}`);
+        isAutoCapturing = false; // Ensure it's false
+        isAutoCapturing = false;
+        identifiedImageDataUrl = null;
+        identifiedStudentName = null;
+        identifiedStudentId = null;
+
+        const markAttendanceBtn = document.getElementById('mark-attendance-btn');
+        if (markAttendanceBtn) markAttendanceBtn.disabled = false;
+
+        const cancelBtn = document.getElementById('cancel-capture-btn');
+        if (cancelBtn) cancelBtn.disabled = true;
+
+        const cameraContainer = document.getElementById('camera-container');
+        if (cameraContainer) {
+            console.log("resetCaptureState: Hiding camera container.");
+            cameraContainer.classList.add('hidden');
+        } else {
+            console.log("resetCaptureState: Camera container not found.");
+        }
+
+        const cameraStatus = document.getElementById('camera-status');
+        if (cameraStatus) cameraStatus.textContent = 'Camera off. Click "Start Webcam" to try again.';
+
+        const attendanceMessage = document.getElementById('attendance-message');
+        if (attendanceMessage) {
+            attendanceMessage.textContent = '';
+            attendanceMessage.className = 'text-sm font-medium'; // Reset class
+        }
+
+        if (identificationInterval) {
+            console.log(`resetCaptureState: Clearing identificationInterval ID: ${identificationInterval}`);
+            clearInterval(identificationInterval);
+            identificationInterval = null;
+            console.log('resetCaptureState: Identification interval CLEARED.');
+        } else {
+            console.log('resetCaptureState: identificationInterval was already null/undefined upon entering resetCaptureState.');
+        }
+        // Ensure identificationInterval is null even if it was already null
+        identificationInterval = null; 
+
+        if (countdownInterval) {
+            console.log(`resetCaptureState: Clearing countdownInterval ID: ${countdownInterval}`);
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+            console.log('resetCaptureState: Countdown interval CLEARED.');
+        } else {
+            console.log('resetCaptureState: countdownInterval was already null/undefined upon entering resetCaptureState.');
+        }
+        countdownInterval = null;
+        document.getElementById('video-overlay').classList.add('hidden');
+        const realtimeStatusOverlay = document.getElementById('realtime-status-overlay');
+        if (realtimeStatusOverlay) realtimeStatusOverlay.classList.add('hidden');
+        document.getElementById('identified-name').textContent = '';
+        document.getElementById('identified-id').textContent = '';
+        document.getElementById('countdown-timer').textContent = '';
+        
+        const bboxCanvas = document.getElementById('bounding-box-canvas');
+        if (bboxCanvas) {
+            const bboxCtx = bboxCanvas.getContext('2d');
+            bboxCtx.clearRect(0, 0, bboxCanvas.width, bboxCanvas.height);
+            bboxCanvas.style.borderColor = 'transparent'; // Hide border when not active
+        }
+        // Re-enable manual capture button if you want it as a fallback
+        // document.getElementById('capture-btn').classList.remove('hidden'); 
+    }
+
+    async function startWebcam() {
+        console.log("startWebcam called");
+
+        const videoElement = document.getElementById('webcam-feed');
+        const cameraStatus = document.getElementById('camera-status');
+        const markAttendanceBtn = document.getElementById('mark-attendance-btn');
+        const cameraContainer = document.getElementById('camera-container');
+        const attendanceMessage = document.getElementById('attendance-message');
+        const cancelBtn = document.getElementById('cancel-capture-btn');
+        const videoOverlay = document.getElementById('video-overlay');
+
+        if (!videoElement || !cameraStatus || !markAttendanceBtn || !cameraContainer || !attendanceMessage || !cancelBtn || !videoOverlay) {
+            console.error("One or more camera UI elements are missing for startWebcam.");
+            // ... (error handling as before)
+            return;
+        }
+        console.log("UI elements for webcam found.");
+        resetCaptureState(); // Reset any previous state
+
+        attendanceMessage.textContent = '';
+        markAttendanceBtn.disabled = true;
+        cancelBtn.disabled = false;
+        cameraContainer.classList.remove('hidden');
+        cameraStatus.textContent = 'Starting camera... Searching for face...';
+
+        console.log("Attempting to access camera via navigator.mediaDevices.getUserMedia...");
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            try {
+                window.stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+                console.log("Camera stream obtained successfully.");
+                console.log("Stream tracks:", window.stream.getTracks()); // Log the tracks
+                videoElement.srcObject = window.stream; // Corrected variable
+                videoElement.onloadedmetadata = async () => { // Make async to await play()
+                    try {
+                        await videoElement.play(); // Explicitly play the video
+                        console.log("Video element started playing.");
+                    } catch (playError) {
+                        console.error("Error trying to play video:", playError);
+                        cameraStatus.textContent = 'Error playing video stream.';
+                        stopWebcam(); // Stop if play fails
+                        return;
+                    }
+                    cameraStatus.textContent = 'Camera active. Detecting face automatically...';
+                    if (identificationInterval) {
+                        console.log(`startWebcam: Clearing existing identificationInterval ID: ${identificationInterval}`);
+                        clearInterval(identificationInterval);
+                    }
+                    identificationInterval = setInterval(attemptLiveIdentification, 2000); // Identify every 2s
+                    console.log(`startWebcam: Started new identificationInterval ID: ${identificationInterval}`);
+                    isAutoCapturing = true;
+                    // Start trying to identify face every ~2 seconds
+                };
+                videoElement.onplay = () => { // Ensure canvas dimensions match video render dimensions
+                    const bboxCanvas = document.getElementById('bounding-box-canvas');
+                    if (bboxCanvas) {
+                        bboxCanvas.width = videoElement.videoWidth;
+                        bboxCanvas.height = videoElement.videoHeight;
+                        // Adjust canvas position to overlay video correctly if needed, CSS handles most of this
+                        // This ensures the drawing coordinates match the video displayed size.
+                    }
+                };
+            } catch (error) {
+                console.error("Error accessing webcam:", error);
+                cameraStatus.textContent = 'Error accessing webcam: ' + error.message;
+                attendanceMessage.textContent = 'Could not start camera. Check permissions.';
+                attendanceMessage.className = 'text-sm text-red-600 font-medium';
+                stopWebcam(); 
+            }
+        } else {
+            console.warn("navigator.mediaDevices.getUserMedia is not supported by this browser.");
+            cameraStatus.textContent = 'Camera features not supported by this browser.';
+            attendanceMessage.textContent = 'Your browser does not support camera access.';
+            attendanceMessage.className = 'text-sm text-red-600 font-medium';
+            stopWebcam(); 
+        }
+    }
+
+    async function attemptLiveIdentification() {
+        if (!isAutoCapturing || !window.stream || identifiedImageDataUrl) return; // Use window.stream // Changed currentStream to stream // Already identified or not in auto-capture mode
+
+        const videoElement = document.getElementById('webcam-feed');
+        const canvasElement = document.getElementById('capture-canvas');
+        const context = canvasElement.getContext('2d');
+        const cameraStatus = document.getElementById('camera-status');
+        const bboxCanvas = document.getElementById('bounding-box-canvas');
+        const bboxCtx = bboxCanvas.getContext('2d');
+
+        // Ensure bounding-box-canvas (bboxCanvas) drawing surface is sized to the video's current display dimensions
+        const videoDisplayWidth = videoElement.clientWidth;
+        const videoDisplayHeight = videoElement.clientHeight;
+
+        if (bboxCanvas.width !== videoDisplayWidth || bboxCanvas.height !== videoDisplayHeight) {
+            bboxCanvas.width = videoDisplayWidth;
+            bboxCanvas.height = videoDisplayHeight;
+            // console.log(`Set bboxCanvas drawing surface to ${bboxCanvas.width}x${bboxCanvas.height} to match video display.`);
+        }
+
+        // Always clear previous bounding box from bboxCanvas
+        bboxCtx.clearRect(0, 0, bboxCanvas.width, bboxCanvas.height);
+        // bboxCanvas.style.borderColor = 'transparent'; // Not strictly needed if cleared
+
+        // Prepare the hidden canvas (canvasElement) to capture the current video frame at its native resolution
+        canvasElement.width = videoElement.videoWidth;  // Native width of the video stream
+        canvasElement.height = videoElement.videoHeight; // Native height of the video stream
+        
+        if (canvasElement.width === 0 || canvasElement.height === 0) {
+            // cameraStatus.textContent = 'Video stream not ready for capture...';
+            return; // Video not ready or dimensions are zero
+        }
+
+        context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+        const currentFrameDataUrl = canvasElement.toDataURL('image/jpeg', 0.7); // Lower quality (0.0 to 1.0) to reduce size
+
+        try {
+            cameraStatus.textContent = 'Attempting to identify face...';
+            const response = await fetch('/Student/identify-live-face', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: `image_data=${encodeURIComponent(currentFrameDataUrl)}`
+            });
+            const result = await response.json();
+            console.log('Live identification response:', result);
+
+            // Draw bounding box if a face was located, regardless of verification status initially
+            if (result.face_location && Array.isArray(result.face_location) && result.face_location.length === 4) {
+                const [top, right, bottom, left] = result.face_location;
+                const originalFrameWidthForBackend = canvasElement.width;
+                const originalFrameHeightForBackend = canvasElement.height;
+                const backendMaxWidthConstraint = 600;
+                let backendProcessedWidth = originalFrameWidthForBackend;
+                let backendProcessedHeight = originalFrameHeightForBackend;
+
+                if (originalFrameWidthForBackend > backendMaxWidthConstraint) {
+                    const scaleRatio = backendMaxWidthConstraint / originalFrameWidthForBackend;
+                    backendProcessedWidth = backendMaxWidthConstraint;
+                    backendProcessedHeight = Math.round(originalFrameHeightForBackend * scaleRatio);
+                }
+
+                const scaleToDisplayX = videoDisplayWidth / backendProcessedWidth;
+                const scaleToDisplayY = videoDisplayHeight / backendProcessedHeight;
+                const finalRectLeft = left * scaleToDisplayX;
+                const finalRectTop = top * scaleToDisplayY;
+                const finalRectWidth = (right - left) * scaleToDisplayX;
+                const finalRectHeight = (bottom - top) * scaleToDisplayY;
+                const mirroredFinalRectLeft = videoDisplayWidth - finalRectLeft - finalRectWidth;
+
+                bboxCtx.strokeStyle = result.success ? 'lime' : 'red'; // Green for verified, Red for not verified but detected
+                bboxCtx.lineWidth = 3;
+                bboxCtx.strokeRect(mirroredFinalRectLeft, finalRectTop, finalRectWidth, finalRectHeight);
+                cameraStatus.textContent = result.success ? 'Face detected. Verifying...' : 'Face detected, but not recognized. Trying again...';
+            }
+
+            const realtimeStatusOverlay = document.getElementById('realtime-status-overlay');
+
+            // Now handle the outcome of the verification
+            if (result.success && result.name && result.id) {
+                // Verification Successful
+                console.log('Live identification SUCCESS:', result);
+                identifiedStudentName = result.name;
+                identifiedStudentId = result.id;
+                identifiedImageDataUrl = currentFrameDataUrl; // Store the frame that was verified
+
+                isAutoCapturing = false;
+                console.log(`attemptLiveIdentification SUCCESS: isAutoCapturing set to ${isAutoCapturing}. Attempting to clear interval ID: ${identificationInterval}`);
+                if (identificationInterval) {
+                    clearInterval(identificationInterval);
+                    console.log(`attemptLiveIdentification SUCCESS: Cleared interval ID: ${identificationInterval}.`);
+                    identificationInterval = null;
+                } else {
+                    console.log('attemptLiveIdentification SUCCESS: identificationInterval was already null.');
+                }
+
+                if (realtimeStatusOverlay) {
+                    realtimeStatusOverlay.textContent = `Matched: ${result.name} (ID: ${result.id})`;
+                    realtimeStatusOverlay.className = 'absolute top-2 left-2 p-2 rounded-md text-white font-semibold text-lg pointer-events-none bg-green-500 bg-opacity-75'; // Green background for match
+                    realtimeStatusOverlay.classList.remove('hidden');
+                }
+
+                document.getElementById('identified-name').textContent = result.name;
+                document.getElementById('identified-id').textContent = `ID: ${result.id}`;
+                document.getElementById('video-overlay').classList.remove('hidden'); // This is the countdown overlay
+                cameraStatus.textContent = `MATCHED: ${result.name}. Confidence: ${result.confidence ? result.confidence.toFixed(2) : 'N/A'}. ${result.attendance_message || ''}`;
+
+                // Start the countdown, passing the attendance message from the backend
+                startAutoCaptureCountdown(result.name, result.id, result.attendance_message || 'Attendance status unknown.');
+            
+            } else if (result.face_location) {
+                // Face detected, but NOT verified
+                console.log('Live identification FAILED (face detected, no match):', result);
+                console.log('attemptLiveIdentification: Path taken - Face detected, NOT matched.');
+                cameraStatus.textContent = result.message || 'Face detected, but not recognized.'; // Simplified message
+                if (realtimeStatusOverlay) {
+                    realtimeStatusOverlay.textContent = 'Not Matched';
+                    realtimeStatusOverlay.className = 'absolute top-2 left-2 p-2 rounded-md text-white font-semibold text-lg pointer-events-none bg-red-500 bg-opacity-75'; // Red background for no match
+                    realtimeStatusOverlay.classList.remove('hidden');
+                }
+                document.getElementById('video-overlay').classList.add('hidden');
+                
+                // Stop further attempts if not matched
+                isAutoCapturing = false;
+                clearInterval(identificationInterval);
+                identificationInterval = null;
+                console.log("Identification stopped: Face detected but not matched.");
+            
+            } else {
+                // No face detected at all
+                console.log('Live identification FAILED (no face detected):', result);
+                console.log('attemptLiveIdentification: Path taken - NO face detected.');
+                cameraStatus.textContent = result.message || 'No face detected. Trying again...';
+                if (realtimeStatusOverlay) realtimeStatusOverlay.classList.add('hidden'); // Hide if no face
+                document.getElementById('video-overlay').classList.add('hidden');
+                // Keep isAutoCapturing = true and interval running to try again (unless you want to stop here too)
+            }
+        } catch (error) {
+            console.error('Error during live identification attempt:', error); // Clarified log message
+            cameraStatus.textContent = 'Error during identification. Retrying...';
+            // Keep trying on the next interval
+        }
+    }
+
+    function startAutoCaptureCountdown(studentName, studentId, attendanceMessage) {
+        const countdownTimerElement = document.getElementById('countdown-timer');
+        const cameraStatus = document.getElementById('camera-status');
+        let countdown = 3; // 3 seconds countdown
+
+        if (!countdownTimerElement) {
+            console.error('Countdown timer element not found!');
+            finalizeAttendanceCapture(studentName, studentId, attendanceMessage); // Proceed immediately if no timer UI
+            return;
+        }
+
+        countdownTimerElement.textContent = `Capturing in ${countdown}...`;
+        cameraStatus.textContent = `MATCHED: ${studentName}. Auto-capturing in ${countdown}s...`;
+        
+        // Clear any existing countdown interval before starting a new one
+        if (countdownInterval) clearInterval(countdownInterval);
+
+        countdownInterval = setInterval(() => {
+            countdown--;
+            countdownTimerElement.textContent = `Capturing in ${countdown}...`;
+            cameraStatus.textContent = `MATCHED: ${studentName}. Auto-capturing in ${countdown}s...`;
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+                countdownTimerElement.textContent = 'Capturing...';
+                finalizeAttendanceCapture(studentName, studentId, attendanceMessage);
+            }
+        }, 1000);
+    }
+
+    async function finalizeAttendanceCapture(studentName, studentId, attendanceMessage) {
+        console.log(`finalizeAttendanceCapture entered for ${studentName} (ID: ${studentId}). Current IDI: ${identificationInterval}, CDI: ${countdownInterval}. Message: ${attendanceMessage}`);
+        
+        const finalAttendanceMessageElement = document.getElementById('attendance-message');
+        const finalCameraStatus = document.getElementById('camera-status');
+
+        if (finalAttendanceMessageElement) {
+            finalAttendanceMessageElement.textContent = attendanceMessage || 'Processing complete.'; 
+            if (attendanceMessage && (attendanceMessage.toLowerCase().includes('successfully marked') || attendanceMessage.toLowerCase().includes('already marked'))) {
+                finalAttendanceMessageElement.className = 'text-sm font-medium text-green-600 dark:text-green-400';
+                if(finalCameraStatus) finalCameraStatus.textContent = attendanceMessage;
+            } else {
+                finalAttendanceMessageElement.className = 'text-sm font-medium text-red-600 dark:text-red-400';
+                if(finalCameraStatus) finalCameraStatus.textContent = attendanceMessage || 'Attendance marking failed or status unknown.';
+            }
+        } else {
+            console.error("finalizeAttendanceCapture: Element with ID 'attendance-message' not found.");
+            if(finalCameraStatus) finalCameraStatus.textContent = attendanceMessage || "Error displaying final status.";
+        }
+
+        console.log("finalizeAttendanceCapture: Calling stopWebcam() to terminate camera and intervals.");
+        stopWebcam(); // This is the primary call to stop camera, clear intervals via resetCaptureState.
+
+        // This setTimeout is now only for clearing the final text messages after a very brief moment,
+        // allowing the user to read them before they disappear. 
+        // All state resetting and interval clearing is handled by the stopWebcam() call above.
+        setTimeout(() => {
+            console.log("finalizeAttendanceCapture: setTimeout executed. Clearing final text from UI elements.");
+            if (finalCameraStatus) finalCameraStatus.textContent = 'Camera off. Click "Start Webcam" to try again.';
+            if (finalAttendanceMessageElement) finalAttendanceMessageElement.textContent = ''; 
+        }, 0); // Changed delay to 0 milliseconds for immediate reset.
+        console.log("finalizeAttendanceCapture: Exiting function.");
+    }
+
+    function fetchStudentAttendanceHistory() {
+        const tableBody = document.getElementById('attendance-history-table-body');
+        if (!tableBody) {
+            console.error('Attendance history table body not found.');
+            return;
+        }
+        tableBody.innerHTML = '<tr class="bg-white dark:bg-slate-800"><td colspan="7" class="py-4 px-6 text-center text-gray-500 dark:text-slate-400 italic">Loading history...</td></tr>'; // Initial loading message
+
+        fetch('/Student/attendance-history') // Assuming this is the correct endpoint
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                tableBody.innerHTML = ''; // Clear loading message or previous records
+                if (data.success && data.history && data.history.length > 0) {
+                    data.history.forEach((record, index) => {
+                        let row = `<tr class="bg-white dark:bg-slate-800">
+                            <td class="py-3 px-4 md:px-6 font-medium text-gray-900">${index + 1}</td>
+                            <td class="py-3 px-4 md:px-6">${record.student_name || 'N/A'}</td>
+                            <td class="py-3 px-4 md:px-6">${record.student_semester !== null ? record.student_semester : 'N/A'}</td>
+                            <td class="py-3 px-4 md:px-6">${new Date(record.class_date).toLocaleString()}</td>
+                            <td class="py-3 px-4 md:px-6">${record.subject || 'N/A'}</td>
+                            <td class="py-3 px-4 md:px-6">${record.class || 'N/A'}</td>
+                            <td class="py-3 px-4 md:px-6">
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${record.status === 'Present' ? 'bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100' : 'bg-red-100 text-red-800 dark:bg-red-700 dark:text-red-100'}">
+                                    ${record.status}
+                                </span>
+                            </td>
+                        </tr>`;
+                        tableBody.innerHTML += row;
+                    });
+                } else if (data.success && (!data.history || data.history.length === 0)) {
+                    tableBody.innerHTML = '<tr class="bg-white dark:bg-slate-800"><td colspan="7" class="py-4 px-6 text-center text-gray-500 dark:text-slate-400 italic">No attendance records found.</td></tr>';
+                } else {
+                    console.error('Failed to fetch attendance history:', data.message);
+                    tableBody.innerHTML = '<tr class="bg-white dark:bg-slate-800"><td colspan="7" class="py-4 px-6 text-center text-red-500 dark:text-red-400">Error loading history: ' + (data.message || 'Unknown error') + '</td></tr>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching attendance history:', error);
+                if (tableBody) { 
+                    tableBody.innerHTML = '<tr class="bg-white dark:bg-slate-800"><td colspan="7" class="py-4 px-6 text-center text-red-500 dark:text-red-400">Error loading history: ' + error.message + '</td></tr>';
+                }
+            });
+    }
+
+    document.getElementById('change-password-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const newPassword = document.getElementById('new-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        const messageDiv = document.getElementById('password-update-message');
+
+        if (newPassword.length < 8) {
+            messageDiv.innerHTML = `<p class="text-red-500">Password must be at least 8 characters long.</p>`;
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            messageDiv.innerHTML = `<p class="text-red-500">Passwords do not match.</p>`;
+            return;
+        }
+
+        fetch('/Student/change-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ new_password: newPassword }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                messageDiv.innerHTML = `<p class="text-green-500">${data.message}</p>`;
+                document.getElementById('change-password-form').reset();
+            } else {
+                messageDiv.innerHTML = `<p class="text-red-500">${data.message}</p>`;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            messageDiv.innerHTML = `<p class="text-red-500">An error occurred. Please try again.</p>`;
+        });
+    });
+
+
+  </script>
+</body>
+</html>

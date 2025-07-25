@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/loader.css" />
+  <style>
+    /* Additional styles for the admin button */
+    .admin-login-container {
+      text-align: center;
+      margin-top: 2rem;
+      position: relative;
+    }
+    
+    .admin-login-btn {
+      background: linear-gradient(135deg, #6e48aa 0%, #9d50bb 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(110, 72, 170, 0.3);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .admin-login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(110, 72, 170, 0.4);
+    }
+    
+    .admin-login-btn:active {
+      transform: translateY(0);
+    }
+    
+    .admin-login-btn::before {
+      content: "⚙️";
+      margin-right: 8px;
+      font-size: 1rem;
+    }
+    
+    .admin-login-btn::after {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -60%;
+      width: 200%;
+      height: 200%;
+      background: rgba(255, 255, 255, 0.13);
+      transform: rotate(30deg);
+      transition: all 0.3s;
+    }
+    
+    .admin-login-btn:hover::after {
+      left: 100%;
+    }
+    
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 1.5rem 0;
+      color: #aaa;
+      font-size: 0.8rem;
+    }
+    
+    .divider::before,
+    .divider::after {
+      content: "";
+      flex: 1;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .divider::before {
+      margin-right: 1rem;
+    }
+    
+    .divider::after {
+      margin-left: 1rem;
+    }
+
+    /* New styles for the form message */
+    .form-message {
+      padding: 12px 15px;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      text-align: center;
+      display: none; /* Hidden by default */
+    }
+    .form-message.error {
+      background-color: #f8d7da; /* Light red */
+      color: #721c24; /* Dark red */
+      border: 1px solid #f5c6cb;
+    }
+    .form-message.success {
+      background-color: #d4edda; /* Light green */
+      color: #155724; /* Dark green */
+      border: 1px solid #c3e6cb;
+    }
+    .form-message i {
+      margin-right: 8px;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1.5rem;
+      color: #007bff;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="background-blur"></div>
+
+  <div class="form-container">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <div id="form-message" class="form-message"></div>
+      <div class="input-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required />
+      </div>
+      <div class="input-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required />
+      </div>
+     
+      <button type="submit" class="submit-btn">Login</button>
+      
+      <div class="divider">or</div>
+      
+      <div class="flex justify-center mt-10 mb-8">
+  <button
+    onclick="window.location.href='{{ url_for('root') }}';"
+    class="flex items-center gap-2 px-7 py-3 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-lg font-bold shadow-md hover:from-blue-600 hover:to-indigo-600 transition-all duration-300"
+    type="button"
+  >
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+    </svg>
+    Back to Home
+  </button>
+</div>
+      
+      <p class="switch-form">Don't have an account? <a href="/signup">Sign Up</a></p>
+    </form>
+  </div>
+
+  <!-- Loader and Success Message -->
+  <div class="overlay" id="loaderOverlay">
+    <div class="loader" id="loader"></div>
+    <div class="success-message" id="successMessage">
+      <div class="success-icon">✅</div>
+      Successfully Logged In!
+    </div>
+  </div>
+
+  <script>
+    const formMessageDiv = document.getElementById('form-message');
+
+    function displayFormMessage(message, type) {
+      if (!formMessageDiv) return;
+      formMessageDiv.innerHTML = `<i class="fas ${type === 'error' ? 'fa-times-circle' : 'fa-check-circle'}"></i> ${message}`;
+      formMessageDiv.className = 'form-message '; // Reset classes
+      formMessageDiv.classList.add(type); // type will be 'error' or 'success'
+      formMessageDiv.style.display = 'block';
+      
+      // Optional: hide after some time, but for login errors, it might be better to keep it visible
+      // setTimeout(() => {
+      //   formMessageDiv.style.display = 'none';
+      // }, 5000);
+    }
+
+    function clearFormMessage() {
+      if (!formMessageDiv) return;
+      formMessageDiv.style.display = 'none';
+      formMessageDiv.innerHTML = '';
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      clearFormMessage(); // Clear previous messages
+      
+      // Show loader
+      document.getElementById('loaderOverlay').style.display = 'flex';
+      document.getElementById('loader').style.display = 'block'; // Ensure loader itself is visible
+      document.getElementById('successMessage').style.display = 'none'; // Hide success message
+      
+      // Collect form data
+      const formData = new FormData(this);
+      
+      // Send data to server
+      fetch('/signin', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        // Try to parse JSON, but handle cases where response might not be JSON (e.g. server error HTML page)
+        return response.json().catch(err => {
+            console.error('Error parsing JSON:', err);
+            return { success: false, message: 'An unexpected server response occurred. Please try again.' };
+        });
+      })
+      .then(data => {
+        if (data.success) {
+          // Show success message in loader overlay
+          document.getElementById('loader').style.display = 'none';
+          document.getElementById('successMessage').style.display = 'flex';
+          
+          // Redirect after delay
+          setTimeout(() => {
+            window.location.href = data.redirect;
+          }, 1500);
+        } else {
+          // Hide loader
+          document.getElementById('loaderOverlay').style.display = 'none';
+          
+          // Check if server instructed a redirect (for incomplete profile)
+          if (data.action === 'redirect' && data.redirect_url) {
+            window.location.href = data.redirect_url;
+          } else {
+            // Otherwise, show the error message in the form
+            displayFormMessage(data.message || 'Login failed. Please try again.', 'error');
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('loaderOverlay').style.display = 'none';
+        displayFormMessage('An error occurred: ' + error.message + '. Please try again.', 'error');
+      });
+    });
+
+    // Prefill username and password if coming from signup
+    window.addEventListener('DOMContentLoaded', function() {
+        const username = localStorage.getItem('signup_username');
+        const password = localStorage.getItem('signup_password');
+        if (username && password) {
+            document.getElementById('username').value = username;
+            document.getElementById('password').value = password;
+            localStorage.removeItem('signup_username');
+            localStorage.removeItem('signup_password');
+        }
+    });
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+</body>
+</html>

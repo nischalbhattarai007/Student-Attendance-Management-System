@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+      /* New styles for the form message */
+      .form-message {
+        padding: 12px 15px;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        text-align: center;
+        display: none; /* Hidden by default */
+      }
+      .form-message.error {
+        background-color: #f8d7da; /* Light red */
+        color: #721c24; /* Dark red */
+        border: 1px solid #f5c6cb;
+      }
+      .form-message.success {
+        background-color: #d4edda; /* Light green */
+        color: #155724; /* Dark green */
+        border: 1px solid #c3e6cb;
+      }
+      .form-message i {
+        margin-right: 8px;
+      }
+      .back-link {
+        display: inline-block;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+        color: #007bff;
+        text-decoration: none;
+      }
+      .back-link:hover {
+        text-decoration: underline;
+      }
+    </style>
+</head>
+<body>
+    <div class="background-blur"></div>
+    <div class="form-container">
+        <h2>Sign Up</h2>
+        <!-- Back link added here -->
+        <a href="{{ url_for('root') }}" class="back-link">Back to Home</a>
+        <div class="flex justify-center mt-10 mb-8">
+            <button
+                onclick="window.location.href='{{ url_for('root') }}';"
+                class="w-56 py-3 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-lg font-bold shadow-md hover:from-blue-600 hover:to-indigo-600 transition-all duration-300"
+                type="button"
+            >
+                ← Back to Home
+            </button>
+        </div>
+        <form id="signupForm">
+            <div id="form-message" class="form-message"></div>
+            <div class="input-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="input-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="input-group">
+                <label for="confirm-password">Confirm Password:</label>
+                <input type="password" id="confirm-password" name="confirm-password" required>
+            </div>
+            <button type="submit" class="submit-btn">Sign Up</button>
+            <p class="switch-form">Already have an account? <a href="/signin">Log In</a></p>
+        </form>
+    </div>
+
+    <script>
+        const formMessageDiv = document.getElementById('form-message');
+
+        function displayFormMessage(message, type) {
+            if (!formMessageDiv) return;
+            formMessageDiv.innerHTML = `<i class="fas ${type === 'error' ? 'fa-times-circle' : 'fa-check-circle'}"></i> ${message}`;
+            formMessageDiv.className = 'form-message '; // Reset classes
+            formMessageDiv.classList.add(type);
+            formMessageDiv.style.display = 'block';
+        }
+
+        function clearFormMessage() {
+            if (!formMessageDiv) return;
+            formMessageDiv.style.display = 'none';
+            formMessageDiv.innerHTML = '';
+        }
+
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            clearFormMessage(); // Clear previous messages
+            
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            
+            if (password !== confirmPassword) {
+                displayFormMessage('Passwords do not match', 'error');
+                return;
+            }
+            
+            const formData = new FormData(this);
+            
+            fetch('/signup', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                // Try to parse JSON, but handle cases where response might not be JSON
+                return response.json().catch(err => {
+                    console.error('Error parsing JSON:', err);
+                    return { success: false, message: 'An unexpected server response occurred. Please try again.' };
+                });
+            })
+            .then(data => {
+                if (data.success) {
+                    // Optionally display a success message here before redirect, though usually not needed for signup->redirect
+                    // displayFormMessage('Signup successful! Redirecting...', 'success');
+                    localStorage.setItem('signup_username', document.getElementById('username').value);
+                    localStorage.setItem('signup_password', document.getElementById('password').value);
+                    // Redirect after a very short delay to allow message to be seen if desired, or redirect immediately
+                    setTimeout(() => { window.location.href = data.redirect; }, 200);
+                } else {
+                    displayFormMessage(data.message || 'Sign up failed. Please try again.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                displayFormMessage('An error occurred: ' + error.message + '. Please try again.', 'error');
+            });
+        });
+    </script>
+    
+</body>
+</html>
